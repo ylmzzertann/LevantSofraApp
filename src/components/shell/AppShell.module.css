@@ -1,0 +1,125 @@
+/* The two shells.
+   Mobile: a full-viewport vertical flex column — fixed header, scrolling body,
+   fixed footer. Nothing else scrolls; that is what keeps the primary action
+   reachable as content grows.
+   Desktop: the same screens in a centred 620px cream sheet on the backdrop. */
+
+/* On the phone the stage is exactly one viewport tall and never scrolls — the
+   body band inside it does. That is what keeps the bag bar and the primary
+   action on screen as the menu grows. */
+.stage {
+  height: 100dvh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.shell {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  background-color: var(--cream);
+}
+
+@media (min-width: 768px) {
+  .stage {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+    background-color: var(--backdrop);
+    background-image: url("/grain.png");
+    background-size: 160px 160px;
+    background-attachment: fixed;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 40px 20px 60px;
+  }
+
+  .shell {
+    width: 620px;
+    max-width: 100%;
+    flex: none;
+    min-height: 760px;
+    border-radius: var(--r-sheet);
+    overflow: hidden;
+    padding-top: 18px;
+    box-shadow: var(--shadow-sheet);
+    background-image: url("/grain.png");
+    background-size: 160px 160px;
+  }
+}
+
+/* The three bands. */
+.header {
+  flex: none;
+}
+
+.body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* Makes the band the offsetParent, so a section's offsetTop is measured from
+     the scroller and the category-chip jump lands where it should. */
+  position: relative;
+}
+
+.footer {
+  flex: none;
+}
+
+/* Screen title row — back chevron, title, optional trailing slot. */
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 6px 24px 16px;
+}
+
+.titleRow.tight {
+  padding-bottom: 6px;
+}
+
+.back {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  margin-left: -9px;
+  border-radius: 50%;
+  flex: none;
+}
+
+.title {
+  font: italic 500 23px/1 var(--font-display), serif;
+  color: var(--ink);
+}
+
+.trailing {
+  margin-left: auto;
+  font: 400 9.5px var(--font-ui), sans-serif;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-45);
+}
+
+/* Three-segment checkout progress. */
+.progress {
+  flex: none;
+  display: flex;
+  gap: 6px;
+  padding: 10px 24px 16px;
+}
+
+.segment {
+  height: 2px;
+  flex: 1;
+  border-radius: 2px;
+  background: var(--rule-section);
+}
+
+.segment[data-on="true"] {
+  background: var(--terracotta);
+}

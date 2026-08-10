@@ -1,0 +1,174 @@
+/* M3 — item detail. Read the dish, leave ingredients out, set quantity, add. */
+
+.photo {
+  flex: none;
+  position: relative;
+  height: 250px;
+}
+
+.float {
+  position: absolute;
+  top: 14px;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: rgba(255, 246, 229, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.floatLeft {
+  left: 16px;
+}
+
+.floatRight {
+  right: 16px;
+}
+
+.head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+  padding-top: 20px;
+}
+
+.name {
+  font: 500 27px/1.1 var(--font-display), serif;
+  color: var(--ink);
+}
+
+.price {
+  font: 500 23px/1 var(--font-display), serif;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.long {
+  font: 400 13.5px/1.6 var(--font-ui), sans-serif;
+  color: rgba(59, 59, 59, 0.65);
+  margin-top: 9px;
+  text-wrap: pretty;
+}
+
+.tags {
+  display: flex;
+  gap: 7px;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
+
+.block {
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--rule-dashed);
+}
+
+.blockHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hint {
+  font: 400 10.5px var(--font-ui), sans-serif;
+  color: var(--ink-42);
+}
+
+.ingredients {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-top: 12px;
+}
+
+.ingredient {
+  font: 400 12.5px var(--font-ui), sans-serif;
+  color: var(--ink);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r-pill);
+  padding: 7px 13px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.35s var(--ease);
+}
+
+.ingredient[data-off="true"] {
+  color: rgba(192, 75, 45, 0.85);
+  border-color: rgba(192, 75, 45, 0.5);
+  background: rgba(192, 75, 45, 0.07);
+  text-decoration: line-through;
+  text-decoration-color: rgba(192, 75, 45, 0.8);
+}
+
+/* Some things cannot come out — you can't take the lamb out of a kebab. They
+   read as part of the dish, with no tap affordance. */
+.ingredient[data-fixed="true"] {
+  cursor: default;
+  color: var(--ink-55);
+  border-style: dashed;
+  border-color: rgba(59, 59, 59, 0.16);
+}
+
+.exclNote {
+  font: 400 11px var(--font-ui), sans-serif;
+  color: var(--ink-45);
+  margin-top: 11px;
+}
+
+.exclNote[data-active="true"] {
+  color: var(--terracotta);
+}
+
+.footer {
+  border-top: 1px solid var(--rule-section);
+  padding: 14px 24px 24px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.stepper {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid rgba(59, 59, 59, 0.22);
+  border-radius: var(--r-pill);
+  padding: 8px 14px;
+  flex: none;
+}
+
+.stepperBtn {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 28px;
+  cursor: pointer;
+}
+
+.stepperBtn::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+}
+
+.stepperValue {
+  font: 500 16px var(--font-display), serif;
+  color: var(--ink);
+  min-width: 12px;
+  text-align: center;
+}
+
+.add {
+  flex: 1;
+  height: 50px;
+}
+
+.tail {
+  height: 20px;
+}

@@ -1,0 +1,263 @@
+/* The dish row — the signature component — plus the section headers and
+   category chips that frame it. `data-variant="site"` is the scaled-up
+   desktop version of the same row. */
+
+.chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  white-space: nowrap;
+  padding: 0 24px 12px;
+  border-bottom: 1px solid rgba(59, 59, 59, 0.13);
+  scrollbar-width: none;
+}
+
+.chip {
+  position: relative;
+  font: 400 11px var(--font-ui), sans-serif;
+  letter-spacing: 0.06em;
+  color: var(--ink-62);
+  border: 1px solid var(--rule-strong);
+  border-radius: 13px;
+  padding: 6px 12px;
+  cursor: pointer;
+  flex: none;
+  background: transparent;
+  transition: all 0.35s var(--ease);
+}
+
+.chips[data-variant="site"] {
+  flex-wrap: wrap;
+  overflow: visible;
+  white-space: normal;
+  padding: 0;
+  border-bottom: none;
+  margin-bottom: 30px;
+}
+
+.chips[data-variant="site"] .chip {
+  font-size: 12px;
+  letter-spacing: 0.05em;
+  border-radius: var(--r-pill);
+  padding: 7px 15px;
+}
+
+.chip:hover {
+  border-color: rgba(59, 59, 59, 0.4);
+  color: var(--ink);
+}
+
+/* The drawn size stays as designed; the touch target grows to the 44px floor. */
+.chip::after,
+.qty::after {
+  content: "";
+  position: absolute;
+  inset: -8px;
+}
+
+/* Section header — centred between two rules on mobile, left-aligned with a
+   single filling rule on the site. */
+.section {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 22px 0 12px;
+}
+
+.rule {
+  flex: 1;
+  height: 1px;
+  background: var(--rule-strong);
+}
+
+.sectionText {
+  text-align: center;
+}
+
+.sectionName {
+  font: italic 500 19px/1 var(--font-display), serif;
+  color: var(--ink);
+}
+
+.sectionSub {
+  font: 400 8.5px/1 var(--font-ui), sans-serif;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink-45);
+  margin-top: 5px;
+}
+
+.section[data-variant="site"] {
+  gap: 16px;
+  padding: 0 0 8px;
+}
+
+.section[data-variant="site"] .sectionText {
+  text-align: left;
+}
+
+.section[data-variant="site"] .sectionName {
+  font-size: 27px;
+}
+
+.section[data-variant="site"] .sectionSub {
+  font-size: 9px;
+  margin-top: 7px;
+}
+
+.section[data-variant="site"] .ruleLead {
+  display: none;
+}
+
+/* Dish grid — load-bearing on the site: a row needs ~340px or the nowrap name,
+   tag, leader and price collide with the + button. */
+.grid[data-variant="site"] {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 0 40px;
+}
+
+.sectionBlock[data-variant="site"] {
+  margin-bottom: 44px;
+}
+
+.row {
+  display: flex;
+  gap: 13px;
+  align-items: flex-start;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--rule-row);
+}
+
+/* The tap target for the detail screen covers everything except the quantity
+   control, which is a sibling — nesting a button inside a link is invalid. */
+.rowMain {
+  display: flex;
+  gap: 13px;
+  align-items: flex-start;
+  flex: 1;
+  min-width: 0;
+  cursor: pointer;
+  color: inherit;
+}
+
+.row[data-variant="site"],
+.row[data-variant="site"] .rowMain {
+  gap: 15px;
+}
+
+.row[data-variant="site"] {
+  padding: 14px 0;
+}
+
+.row[data-available="false"] {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.thumb {
+  width: 46px;
+  height: 46px;
+  border-radius: var(--r-thumb);
+  flex: none;
+  background: rgba(192, 75, 45, 0.11);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.row[data-variant="site"] .thumb {
+  width: 52px;
+  height: 52px;
+}
+
+.text {
+  flex: 1;
+  min-width: 0;
+}
+
+.baseline {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.row[data-variant="site"] .baseline {
+  gap: 7px;
+}
+
+.name {
+  font: 500 15px var(--font-display), serif;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+.price {
+  font: 500 15px var(--font-display), serif;
+  color: var(--ink);
+}
+
+.row[data-variant="site"] .name,
+.row[data-variant="site"] .price {
+  font-size: 16.5px;
+}
+
+.row[data-variant="site"] .leader {
+  transform: translateY(-4px);
+}
+
+.desc {
+  font: 400 11.5px/1.45 var(--font-ui), sans-serif;
+  color: rgba(59, 59, 59, 0.58);
+  margin-top: 3px;
+}
+
+.row[data-variant="site"] .desc {
+  font-size: 12.5px;
+  line-height: 1.5;
+  margin-top: 4px;
+}
+
+.soldOut {
+  font: 600 8.5px var(--font-ui), sans-serif;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-50);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r-tag);
+  padding: 2px 4px;
+  white-space: nowrap;
+}
+
+/* Quantity control. Outlined + when the dish isn't in the bag, filled
+   terracotta with the count when it is. */
+.qty {
+  position: relative;
+  width: 29px;
+  height: 29px;
+  border-radius: 50%;
+  border: 1.3px solid rgba(192, 75, 45, 0.5);
+  color: var(--terracotta);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  margin-top: 2px;
+  cursor: pointer;
+  background: transparent;
+  transition: all 0.35s var(--ease);
+}
+
+.qty[data-in-bag="true"] {
+  background: var(--terracotta);
+  border-color: var(--terracotta);
+  color: var(--cream);
+  font: 500 13px var(--font-ui), sans-serif;
+}
+
+.qty:disabled {
+  cursor: default;
+  border-color: var(--rule-strong);
+  color: var(--ink-42);
+}

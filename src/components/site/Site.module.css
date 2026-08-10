@@ -1,0 +1,342 @@
+/* The web site shell — always in online/delivery mode. No table badge, no
+   "send to the kitchen", no service charge. */
+
+.page {
+  width: 100%;
+  max-width: 1240px;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+/* W1 — header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 22px 0 34px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.wordmark {
+  font: italic 600 25px/1 var(--font-display), serif;
+  color: var(--ink);
+}
+
+.eyebrow {
+  font: 400 9px/1.4 var(--font-ui), sans-serif;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--ink-50);
+  margin-top: 4px;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 30px;
+}
+
+.navLink {
+  font: 400 13.5px var(--font-ui), sans-serif;
+  color: var(--ink-62);
+  padding-bottom: 2px;
+  border-bottom: 1.5px solid transparent;
+}
+
+.navLink[data-active="true"] {
+  color: var(--ink);
+  border-bottom-color: var(--terracotta);
+}
+
+.bagPill {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--ink);
+  border-radius: var(--r-pill);
+  padding: 7px 7px 7px 17px;
+  cursor: pointer;
+}
+
+.bagPill span {
+  font: 500 12.5px var(--font-ui), sans-serif;
+  color: var(--cream);
+}
+
+.bagPillChip {
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: rgba(255, 246, 229, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* W2 — hero */
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  gap: 44px;
+  align-items: end;
+  padding-bottom: 58px;
+}
+
+.openPill {
+  display: inline-block;
+  border: 1px solid rgba(107, 138, 74, 0.5);
+  background: rgba(107, 138, 74, 0.09);
+  border-radius: var(--r-pill);
+  padding: 6px 13px;
+  font: 500 9.5px var(--font-ui), sans-serif;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--olive);
+}
+
+.headline {
+  font: 400 66px/1.02 var(--font-display), serif;
+  color: var(--ink);
+  margin-top: 20px;
+  letter-spacing: -0.015em;
+}
+
+.headline em {
+  font-style: italic;
+  color: var(--terracotta);
+}
+
+.heroCopy {
+  font: 400 15px/1.65 var(--font-ui), sans-serif;
+  color: var(--ink-70);
+  max-width: 430px;
+  margin-top: 20px;
+  text-wrap: pretty;
+}
+
+.heroButtons {
+  display: flex;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.heroPrimary {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  background: var(--terracotta);
+  border-radius: var(--r-pill);
+  padding: 9px 9px 9px 22px;
+  cursor: pointer;
+  box-shadow: 0 14px 30px -14px rgba(192, 75, 45, 0.85);
+}
+
+.heroPrimary span {
+  font: 500 14px var(--font-ui), sans-serif;
+  color: var(--cream);
+}
+
+.heroPrimaryChip {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 246, 229, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.heroSecondary {
+  display: flex;
+  align-items: center;
+  padding: 9px 22px;
+  border: 1px solid rgba(59, 59, 59, 0.25);
+  border-radius: var(--r-pill);
+  font: 500 14px var(--font-ui), sans-serif;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+/* W3 — menu section */
+.menuGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+  gap: 52px;
+  align-items: start;
+  border-top: 1px solid var(--rule-section);
+  padding-top: 44px;
+}
+
+.sticky {
+  position: sticky;
+  top: 92px;
+}
+
+.panel {
+  background: rgba(255, 246, 229, 0.9);
+  border: 1px solid rgba(59, 59, 59, 0.13);
+  border-radius: var(--r-card);
+  padding: 22px 20px;
+}
+
+.panelHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-bottom: 14px;
+  border-bottom: 1px dashed rgba(59, 59, 59, 0.25);
+}
+
+.panelTitle {
+  font: italic 500 20px/1 var(--font-display), serif;
+  color: var(--ink);
+}
+
+.panelCount {
+  font: 400 9px var(--font-ui), sans-serif;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-45);
+}
+
+.panelEmpty {
+  font: 400 13px/1.6 var(--font-ui), sans-serif;
+  color: var(--ink-50);
+  padding: 22px 0 6px;
+  text-wrap: pretty;
+}
+
+.panelLine {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 11px 0;
+  border-bottom: 1px solid rgba(59, 59, 59, 0.08);
+}
+
+.panelQty {
+  font: 500 12px var(--font-ui), sans-serif;
+  color: var(--terracotta);
+  min-width: 20px;
+}
+
+.panelName {
+  font: 500 14.5px var(--font-display), serif;
+  color: var(--ink);
+  flex: 1;
+  min-width: 0;
+}
+
+.panelLineTotal {
+  font: 500 14px var(--font-display), serif;
+  color: var(--ink);
+}
+
+.panelSubtotal {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-top: 15px;
+}
+
+.panelSubtotalLabel {
+  font: 400 11px var(--font-ui), sans-serif;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-50);
+}
+
+.panelSubtotalValue {
+  font: 500 21px var(--font-display), serif;
+  color: var(--ink);
+}
+
+.checkout {
+  margin-top: 18px;
+  height: 48px;
+  border-radius: var(--r-pill);
+  background: var(--terracotta);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+  box-shadow: 0 14px 28px -14px rgba(192, 75, 45, 0.85);
+  width: 100%;
+}
+
+.checkout span {
+  font: 500 13.5px var(--font-ui), sans-serif;
+  color: var(--cream);
+}
+
+.checkoutChip {
+  width: 27px;
+  height: 27px;
+  border-radius: 50%;
+  background: rgba(255, 246, 229, 0.18);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.reassure {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  font: 400 11px var(--font-ui), sans-serif;
+  color: var(--ink-50);
+}
+
+.qrBox {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 18px;
+  padding: 14px 16px;
+  border: 1px dashed rgba(59, 59, 59, 0.22);
+  border-radius: var(--r-card);
+  font: 400 11.5px/1.5 var(--font-ui), sans-serif;
+  color: rgba(59, 59, 59, 0.6);
+  text-wrap: pretty;
+}
+
+/* W4 — footer */
+.footer {
+  border-top: 1px solid var(--rule-section);
+  margin-top: 50px;
+  padding: 26px 0 40px;
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  font: 400 11.5px var(--font-ui), sans-serif;
+  color: var(--ink-50);
+}
+
+/* Between the phone breakpoint and a comfortable desktop the sidebar has to
+   drop under the menu; the dish grid collapses to one column on its own. */
+@media (max-width: 1099px) {
+  .menuGrid {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 36px;
+  }
+
+  .sticky {
+    position: static;
+  }
+
+  .hero {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 28px;
+  }
+
+  .headline {
+    font-size: 52px;
+  }
+}

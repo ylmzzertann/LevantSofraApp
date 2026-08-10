@@ -1,0 +1,136 @@
+/* M1 — QR landing. The QR carries the table number, so the mode is detected,
+   not chosen. The screen confirms what was detected and offers the alternative. */
+
+.screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 40px 30px;
+  text-align: center;
+}
+
+.logoRow {
+  display: flex;
+  justify-content: center;
+}
+
+.wordmark {
+  font: italic 600 38px/1 var(--font-display), serif;
+  color: var(--ink);
+  margin-top: 20px;
+}
+
+.eyebrow {
+  font: 400 9.5px/1 var(--font-ui), sans-serif;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  color: var(--ink-50);
+  margin-top: 12px;
+}
+
+.tableCard {
+  margin-top: 44px;
+  border: 1px dashed rgba(107, 138, 74, 0.55);
+  background: rgba(107, 138, 74, 0.08);
+  border-radius: var(--r-card);
+  padding: 20px 18px;
+  position: relative;
+}
+
+.stamp {
+  position: absolute;
+  top: -11px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--olive);
+  color: var(--cream);
+  font: 600 8.5px var(--font-ui), sans-serif;
+  letter-spacing: 0.18em;
+  padding: 4px 10px;
+  border-radius: var(--r-tag);
+  white-space: nowrap;
+}
+
+.seatedAt {
+  font: 400 12.5px/1.5 var(--font-ui), sans-serif;
+  color: var(--ink-62);
+  margin-top: 4px;
+}
+
+.tableNo {
+  font: 500 34px/1 var(--font-display), serif;
+  color: var(--olive);
+  margin-top: 6px;
+}
+
+.open {
+  margin-top: 18px;
+  width: 100%;
+  height: 46px;
+  border-radius: var(--r-pill);
+  background: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  cursor: pointer;
+}
+
+.open span {
+  font: 500 13.5px var(--font-ui), sans-serif;
+  color: var(--cream);
+}
+
+.openChip {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(255, 246, 229, 0.16);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.or {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 26px 0 22px;
+}
+
+.orRule {
+  flex: 1;
+  height: 1px;
+  background: var(--rule-section);
+}
+
+.orWord {
+  font: 400 9.5px var(--font-ui), sans-serif;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-42);
+}
+
+.delivery {
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--r-card);
+  padding: 16px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+}
+
+.deliveryTitle {
+  font: 500 15px var(--font-display), serif;
+  color: var(--ink);
+}
+
+.deliverySub {
+  font: 400 11.5px var(--font-ui), sans-serif;
+  color: var(--ink-55);
+  margin-top: 3px;
+}

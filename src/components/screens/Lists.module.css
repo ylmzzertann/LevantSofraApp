@@ -1,0 +1,150 @@
+/* M8 saved plates, M9 past orders. */
+
+.row {
+  display: flex;
+  gap: 13px;
+  align-items: center;
+  padding: 13px 0;
+  border-bottom: 1px solid rgba(59, 59, 59, 0.1);
+}
+
+.thumb {
+  width: 46px;
+  height: 46px;
+  border-radius: var(--r-thumb);
+  flex: none;
+  background: rgba(192, 75, 45, 0.11);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.rowMain {
+  flex: 1;
+  min-width: 0;
+  color: inherit;
+}
+
+.name {
+  font: 500 15.5px var(--font-display), serif;
+  color: var(--ink);
+}
+
+.meta {
+  font: 400 11.5px var(--font-ui), sans-serif;
+  color: var(--ink-55);
+  margin-top: 2px;
+}
+
+.addButton {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1.3px solid rgba(192, 75, 45, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: none;
+  cursor: pointer;
+  background: transparent;
+}
+
+.empty {
+  padding: 56px 0;
+  text-align: center;
+  font: 400 13.5px/1.6 var(--font-ui), sans-serif;
+  color: var(--ink-55);
+  text-wrap: pretty;
+}
+
+/* Past orders */
+.card {
+  border: 1px solid rgba(59, 59, 59, 0.13);
+  border-radius: var(--r-card);
+  padding: 16px;
+  margin-bottom: 14px;
+  background: rgba(255, 255, 255, 0.35);
+}
+
+.cardHead {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+
+.date {
+  font: 500 13px var(--font-ui), sans-serif;
+  color: var(--ink);
+}
+
+.badge {
+  font: 600 9px var(--font-ui), sans-serif;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: var(--r-tag);
+  white-space: nowrap;
+}
+
+.badge[data-mode="online"] {
+  color: var(--terracotta);
+  background: rgba(192, 75, 45, 0.1);
+}
+
+.badge[data-mode="table"] {
+  color: var(--olive);
+  background: rgba(107, 138, 74, 0.12);
+}
+
+.items {
+  font: 400 12.5px/1.6 var(--font-ui), sans-serif;
+  color: rgba(59, 59, 59, 0.6);
+  margin-top: 8px;
+  text-wrap: pretty;
+}
+
+.cardFoot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--rule-strong);
+}
+
+.cardTotal {
+  font: 500 18px var(--font-display), serif;
+  color: var(--ink);
+}
+
+.reorder {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(192, 75, 45, 0.5);
+  border-radius: var(--r-pill);
+  padding: 7px 7px 7px 15px;
+  cursor: pointer;
+  background: transparent;
+}
+
+.reorder span {
+  font: 500 12px var(--font-ui), sans-serif;
+  color: var(--terracotta);
+}
+
+.reorderChip {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(192, 75, 45, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tail {
+  height: 24px;
+}
