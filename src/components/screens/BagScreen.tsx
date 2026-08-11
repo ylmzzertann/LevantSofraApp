@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { PlateGlyph } from "@/components/brand/Logo";
 import { TotalsBlock } from "@/components/checkout/TotalsBlock";
 import { ArrowOut, Minus, PlusSmall, Ticket } from "@/components/icons";
@@ -12,10 +13,11 @@ import {
   ScreenHeader,
   TitleRow,
 } from "@/components/shell/AppShell";
-import { DISHES } from "@/data/menu";
+import type { PromoResult } from "@/lib/api-types";
 import { exclusionLine } from "@/lib/bag";
 import { money } from "@/lib/money";
 import { totalRows } from "@/lib/totals";
+import { useMenu } from "@/state/menu";
 import { useStore } from "@/state/store";
 import s from "./Checkout.module.css";
 
@@ -24,9 +26,31 @@ const SPLITS = [1, 2, 3, 4];
 /** M4 — the bag. Two lines of the same dish with different exclusions stay apart. */
 export function BagScreen() {
   const router = useRouter();
-  const { state, totals, bump, set, applyPromo } = useStore();
-  const online = state.mode === "online";
+  const { dishes } = useMenu();
+  const { state, totals, bump, set, patch } = useStore();
+  const [checking, setChecking] = useState(false);
+  const pickup = state.mode === "pickup";
   const empty = state.bag.length === 0;
+  const soldOut = state.bag.filter((l) => dishes[l.id] && !dishes[l.id].available);
+
+  /* The promo is validated by the server — expiry and redemption limits are not
+     things a browser gets to decide. */
+  const applyPromo = async () => {
+    setChecking(true);
+    try {
+      const res = await fetch("/api/promos/validate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: state.promo }),
+      });
+      const result = (await res.json()) as PromoResult;
+      patch({ promoPercent: result.valid ? result.percentOff : 0, promoMsg: result.message });
+    } catch {
+      patch({ promoPercent: 0, promoMsg: "Couldn't reach us just now. Try again." });
+    } finally {
+      setChecking(false);
+    }
+  };
 
   return (
     <AppShell>
@@ -34,7 +58,7 @@ export function BagScreen() {
         <TitleRow
           title="Your bag"
           backTo="/"
-          trailing={online ? "Delivery" : state.tableLabel || "Table"}
+          trailing={pickup ? "Pickup" : state.tableLabel || "Table"}
         />
       </ScreenHeader>
 
@@ -48,15 +72,17 @@ export function BagScreen() {
           </div>
         ) : (
           state.bag.map((l) => {
-            const dish = DISHES[l.id];
+            const dish = dishes[l.id];
+            if (!dish) return null;
             return (
-              <div key={l.key} className={s.line}>
+              <div key={l.key} className={s.line} data-available={dish.available}>
                 <div className={s.thumb}>
                   <PlateGlyph />
                 </div>
                 <div className={s.lineBody}>
                   <div className={s.lineName}>{dish.name}</div>
                   <div className={s.lineEach}>{money(dish.price)} each</div>
+                  {!dish.available && <div className={s.lineExcl}>Just sold out</div>}
                   {l.excl.length > 0 && <div className={s.lineExcl}>{exclusionLine(l.excl)}</div>}
                   {l.note && <div className={s.lineNote}>&ldquo;{l.note}&rdquo;</div>}
                   <div className={s.stepper}>
@@ -74,6 +100,7 @@ export function BagScreen() {
                       className={s.stepperBtn}
                       aria-label={`One more ${dish.name}`}
                       onClick={() => bump(l.key, 1)}
+                      disabled={!dish.available}
                     >
                       <PlusSmall size={12} />
                     </button>
@@ -96,12 +123,17 @@ export function BagScreen() {
                 placeholder="Promo code"
                 aria-label="Promo code"
               />
-              <button type="button" className={s.promoApply} onClick={applyPromo}>
-                APPLY
+              <button
+                type="button"
+                className={s.promoApply}
+                onClick={applyPromo}
+                disabled={checking}
+              >
+                {checking ? "…" : "APPLY"}
               </button>
             </div>
             {state.promoMsg && (
-              <div className={s.promoNote} data-ok={state.promoOn}>
+              <div className={s.promoNote} data-ok={state.promoPercent > 0}>
                 {state.promoMsg}
               </div>
             )}
@@ -121,15 +153,17 @@ export function BagScreen() {
                   </button>
                 ))}
               </div>
+              {/* One card still pays the whole bill — this is what each person
+                  owes so the table can settle up between themselves. */}
               <div className={s.caption}>
                 {state.split > 1
-                  ? `${money(totals.preTip / state.split)} each before tip, charged separately.`
+                  ? `${money(Math.round(totals.preTip / state.split))} each before tip. One card pays, settle between you.`
                   : "One card pays the whole table."}
               </div>
             </div>
 
             <TotalsBlock
-              rows={totalRows(totals, state.mode)}
+              rows={totalRows(totals, state.mode, state.promoPercent ? state.promo.trim().toUpperCase() : undefined)}
               grandLabel="Total"
               grandValue={money(totals.preTip)}
             />
@@ -141,12 +175,19 @@ export function BagScreen() {
       {!empty && (
         <ScreenFooter>
           <div className={s.footer}>
+            {soldOut.length > 0 && (
+              <div className={s.blockingNote}>
+                {soldOut.map((l) => dishes[l.id].name).join(", ")} just sold out — remove it to
+                continue.
+              </div>
+            )}
             <button
               type="button"
               className="ls-action"
-              onClick={() => router.push(online ? "/address" : "/pay")}
+              disabled={soldOut.length > 0}
+              onClick={() => router.push(pickup ? "/pickup" : "/pay")}
             >
-              <span>{online ? "Delivery details" : "Send to the kitchen"}</span>
+              <span>{pickup ? "Pickup details" : "Send to the kitchen"}</span>
               <div className="ls-chip">
                 <ArrowOut size={12} />
               </div>

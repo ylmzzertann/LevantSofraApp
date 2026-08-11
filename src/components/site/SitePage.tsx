@@ -6,9 +6,10 @@ import { ArrowOut, QrGlyph, Shield } from "@/components/icons";
 import { PhotoSlot } from "@/components/media/PhotoSlot";
 import { CategoryChips, MenuSections } from "@/components/menu/MenuBoard";
 import { useSectionNav } from "@/components/menu/useSectionNav";
-import { DISHES } from "@/data/menu";
+import { HOURS_LABEL, RESTAURANT } from "@/config/restaurant";
 import { bagCount } from "@/lib/bag";
 import { itemLabel, money } from "@/lib/money";
+import { useMenu } from "@/state/menu";
 import { useStore } from "@/state/store";
 import s from "./Site.module.css";
 
@@ -21,9 +22,11 @@ const NAV = [
 
 /** W1–W4. The site is always online/delivery mode. */
 export function SitePage() {
+  const { dishes, categories } = useMenu();
   const { state, totals } = useStore();
   const { register, jump } = useSectionNav();
   const count = bagCount(state.bag);
+  const firstCategory = categories[0]?.key;
 
   return (
     <div className={s.page}>
@@ -52,7 +55,7 @@ export function SitePage() {
 
       <section className={s.hero}>
         <div>
-          <div className={s.openPill}>Open today · 12:00 — 23:30</div>
+          <div className={s.openPill}>{HOURS_LABEL}</div>
           <h1 className={s.headline}>
             One table
             <br />
@@ -61,12 +64,16 @@ export function SitePage() {
             to <em>Palermo</em>.
           </h1>
           <p className={s.heroCopy}>
-            Charcoal, olive oil and long-cooked pots. Sit down with us, or have the same menu sent to
-            your door.
+            Charcoal, olive oil and long-cooked pots. Sit down with us, or order ahead and collect
+            it at a time that suits you.
           </p>
           <div className={s.heroButtons}>
-            <button type="button" className={s.heroPrimary} onClick={() => jump("mezze")}>
-              <span>Order online</span>
+            <button
+              type="button"
+              className={s.heroPrimary}
+              onClick={() => firstCategory && jump(firstCategory)}
+            >
+              <span>Order for pickup</span>
               <div className={s.heroPrimaryChip}>
                 <ArrowOut size={13} />
               </div>
@@ -97,13 +104,15 @@ export function SitePage() {
                 Nothing yet. Add a few mezze — they arrive together for the table.
               </p>
             ) : (
-              state.bag.map((l) => (
-                <div key={l.key} className={s.panelLine}>
-                  <span className={s.panelQty}>{l.qty}×</span>
-                  <span className={s.panelName}>{DISHES[l.id].name}</span>
-                  <span className={s.panelLineTotal}>{money(DISHES[l.id].price * l.qty)}</span>
-                </div>
-              ))
+              state.bag.map((l) =>
+                dishes[l.id] ? (
+                  <div key={l.key} className={s.panelLine}>
+                    <span className={s.panelQty}>{l.qty}×</span>
+                    <span className={s.panelName}>{dishes[l.id].name}</span>
+                    <span className={s.panelLineTotal}>{money(dishes[l.id].price * l.qty)}</span>
+                  </div>
+                ) : null,
+              )
             )}
 
             <div className={s.panelSubtotal}>
@@ -120,7 +129,9 @@ export function SitePage() {
 
             <div className={s.reassure}>
               <Shield />
-              <span>Delivery in 35–45 min · free over $60</span>
+              <span>
+                Ready in {RESTAURANT.pickup.leadMinutes} min · collect with a code
+              </span>
             </div>
           </div>
 
@@ -132,8 +143,10 @@ export function SitePage() {
       </div>
 
       <footer className={s.footer}>
-        <span>Kalamış Cd. 41, Kadıköy · +90 216 000 00 00</span>
-        <span>© 2026 Levant Sofra</span>
+        <span>
+          {RESTAURANT.address} · {RESTAURANT.phone}
+        </span>
+        <span>© {new Date().getFullYear()} {RESTAURANT.name}</span>
       </footer>
     </div>
   );

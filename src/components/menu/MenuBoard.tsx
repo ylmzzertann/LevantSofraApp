@@ -1,6 +1,6 @@
 "use client";
 
-import { CATEGORIES } from "@/data/menu";
+import { useMenu } from "@/state/menu";
 import { DishRow, type Variant } from "./DishRow";
 import s from "./Menu.module.css";
 
@@ -11,9 +11,10 @@ export function CategoryChips({
   variant: Variant;
   onJump: (key: string) => void;
 }) {
+  const { categories } = useMenu();
   return (
     <div className={s.chips} data-variant={variant}>
-      {CATEGORIES.map((c) => (
+      {categories.map((c) => (
         <button key={c.key} type="button" className={s.chip} onClick={() => onJump(c.key)}>
           {c.label}
         </button>
@@ -29,9 +30,10 @@ export function MenuSections({
   variant: Variant;
   register: (key: string) => (el: HTMLElement | null) => void;
 }) {
+  const { categories } = useMenu();
   return (
     <>
-      {CATEGORIES.map((c) => (
+      {categories.map((c) => (
         <div key={c.key} ref={register(c.key)} className={s.sectionBlock} data-variant={variant}>
           <div className={s.section} data-variant={variant}>
             <div className={`${s.rule} ${s.ruleLead}`} />

@@ -36,7 +36,7 @@ export function ItemScreen({ dish }: { dish: Dish }) {
     <AppShell>
       <ScreenHeader>
         <div className={s.photo}>
-          <PhotoSlot label={dish.name} height="100%" radius="0" />
+          <PhotoSlot src={dish.imageUrl ?? undefined} alt={dish.name} label={dish.name} height="100%" radius="0" />
           <button
             type="button"
             className={`${s.float} ${s.floatLeft}`}

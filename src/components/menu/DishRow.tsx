@@ -30,7 +30,12 @@ export function DishRow({ dish, variant }: { dish: Dish; variant: Variant }) {
         }}
       >
         <div className={s.thumb}>
-          <PlateGlyph size={variant === "site" ? 22 : 20} />
+          {dish.imageUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={dish.imageUrl} alt="" className={s.thumbImg} />
+          ) : (
+            <PlateGlyph size={variant === "site" ? 22 : 20} />
+          )}
         </div>
         <div className={s.text}>
           <div className={s.baseline}>

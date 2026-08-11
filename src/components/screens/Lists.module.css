@@ -87,7 +87,7 @@
   white-space: nowrap;
 }
 
-.badge[data-mode="online"] {
+.badge[data-mode="pickup"] {
   color: var(--terracotta);
   background: rgba(192, 75, 45, 0.1);
 }

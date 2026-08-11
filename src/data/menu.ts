@@ -1,9 +1,10 @@
 /**
- * The menu.
+ * The menu the restaurant opened with — now only the **seed** for an empty
+ * database. `GET /api/menu` is the live source; staff edit dishes in the admin
+ * panel, not in this file.
  *
- * This is the shape `GET /menu` will return once the backend exists — the file
- * is deliberately written as data, not as code, so swapping it for a fetch is a
- * one-line change in `getMenu()`.
+ * Prices are written in dollars here because that is how a menu is read, and
+ * converted to cents in `CATEGORIES` because that is how money is stored.
  *
  * Ingredients are a real field, not a split of the description (the prototype
  * derived them by splitting on commas). A `*` prefix marks an ingredient the
@@ -24,11 +25,13 @@ export interface Dish {
   cat: string;
   catLabel: string;
   name: string;
+  /** Cents. */
   price: number;
   desc: string;
   long: string;
   tag: Tag | "";
   ingredients: Ingredient[];
+  imageUrl: string | null;
   available: boolean;
 }
 
@@ -485,6 +488,7 @@ function toIngredient(raw: string, dishId: string, i: number): Ingredient {
   return { id: `${dishId}-${i}`, label, removable };
 }
 
+/** The seed menu. Prices converted from dollars to cents on the way out. */
 export const CATEGORIES: Category[] = RAW.map(([key, label, sub, rows]) => ({
   key,
   label,
@@ -494,19 +498,22 @@ export const CATEGORIES: Category[] = RAW.map(([key, label, sub, rows]) => ({
     cat: key,
     catLabel: label,
     name,
-    price,
+    price: Math.round(price * 100),
     desc,
     long: long || desc,
     tag,
     ingredients: ingredients.map((g, i) => toIngredient(g, id, i)),
+    imageUrl: null,
     available: true,
   })),
 }));
 
-export const DISHES: Record<string, Dish> = Object.fromEntries(
-  CATEGORIES.flatMap((c) => c.items).map((d) => [d.id, d]),
-);
+/** Flattens a menu into `{ dishId: dish }` for the lookups the screens need. */
+export function indexDishes(categories: Category[]): Record<string, Dish> {
+  return Object.fromEntries(categories.flatMap((c) => c.items).map((d) => [d.id, d]));
+}
 
-export function getDish(id: string): Dish | undefined {
-  return DISHES[id];
+/** Unit prices in cents, the shape `computeTotals` wants. */
+export function priceMap(categories: Category[]): Record<string, number> {
+  return Object.fromEntries(categories.flatMap((c) => c.items).map((d) => [d.id, d.price]));
 }

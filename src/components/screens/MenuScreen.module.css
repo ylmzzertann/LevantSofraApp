@@ -32,7 +32,7 @@
   color: var(--olive);
 }
 
-.mode[data-mode="online"] {
+.mode[data-mode="pickup"] {
   border-color: rgba(192, 75, 45, 0.45);
   background: rgba(192, 75, 45, 0.08);
   color: var(--terracotta);

@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { Logo } from "@/components/brand/Logo";
 import { ArrowOut, ChevronRight } from "@/components/icons";
 import { AppShell } from "@/components/shell/AppShell";
+import { RESTAURANT } from "@/config/restaurant";
 import { useStore } from "@/state/store";
 import s from "./Entry.module.css";
 
@@ -21,8 +22,8 @@ export function EntryScreen({ table }: { table: string }) {
      anything, but only once the stored session has loaded, or the restore
      would overwrite the table we just detected. */
   useEffect(() => {
-    if (hydrated) setMode("table", label);
-  }, [hydrated, setMode, label]);
+    if (hydrated) setMode("table", table, label);
+  }, [hydrated, setMode, table, label]);
 
   return (
     <AppShell>
@@ -30,8 +31,8 @@ export function EntryScreen({ table }: { table: string }) {
         <div className={s.logoRow}>
           <Logo size={62} />
         </div>
-        <div className={s.wordmark}>Levant Sofra</div>
-        <div className={s.eyebrow}>Mezze · Fire · Sea</div>
+        <div className={s.wordmark}>{RESTAURANT.name}</div>
+        <div className={s.eyebrow}>{RESTAURANT.eyebrow}</div>
 
         <div className={s.tableCard}>
           <div className={s.stamp}>QR SCANNED</div>
@@ -41,7 +42,7 @@ export function EntryScreen({ table }: { table: string }) {
             type="button"
             className={s.open}
             onClick={() => {
-              setMode("table", label);
+              setMode("table", table, label);
               router.push("/");
             }}
           >
@@ -62,13 +63,15 @@ export function EntryScreen({ table }: { table: string }) {
           type="button"
           className={s.delivery}
           onClick={() => {
-            setMode("online");
+            setMode("pickup");
             router.push("/");
           }}
         >
           <div>
-            <div className={s.deliveryTitle}>Order for delivery</div>
-            <div className={s.deliverySub}>35–45 min · Kadıköy &amp; around</div>
+            <div className={s.deliveryTitle}>Order ahead for pickup</div>
+            <div className={s.deliverySub}>
+              Ready in {RESTAURANT.pickup.leadMinutes} min, or pick a time
+            </div>
           </div>
           <ChevronRight />
         </button>

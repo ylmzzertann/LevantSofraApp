@@ -9,36 +9,24 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { addLine, bagKey, bumpLine, type BagLine } from "@/lib/bag";
-import { computeTotals, validatePromo, type Mode, type Totals } from "@/lib/totals";
+import { addLine, bumpLine, type BagLine } from "@/lib/bag";
+import type { PlacedOrder } from "@/lib/api-types";
+import { computeTotals, type Mode, type Totals } from "@/lib/totals";
+import { useMenu } from "./menu";
 
 export type PayMethod = "card" | "apple" | "google";
-export type WhenChoice = "asap" | "later";
-
-export interface Address {
-  street: string;
-  city: string;
-  phone: string;
-  note: string;
-}
-
-export interface PastOrder {
-  orderNo: string;
-  date: string;
-  mode: Mode;
-  where: string;
-  lines: BagLine[];
-  total: number;
-}
 
 export interface State {
   mode: Mode;
+  tableId: string;
   tableLabel: string;
   bag: BagLine[];
   favs: Record<string, boolean>;
   promo: string;
-  promoOn: boolean;
+  /** 0 when no promo is applied. The server is the authority; this is display. */
+  promoPercent: number;
   promoMsg: string;
+  /** How many ways the table is settling up. Informational — one card still pays. */
   split: number;
   pay: PayMethod;
   card: string;
@@ -46,61 +34,25 @@ export interface State {
   cvc: string;
   cardMsg: string;
   tip: number;
-  addr: Address;
-  when: WhenChoice;
-  /** The order just placed — the confirmation screen reads this, not the bag. */
-  placed: PastOrder | null;
-  orders: PastOrder[];
+  /* Pickup */
+  customerName: string;
+  customerPhone: string;
+  /** "asap" or an ISO timestamp from the slot list. */
+  pickupAt: string;
+  pickupMsg: string;
+  /** The order the server accepted — the confirmation screen reads this. */
+  placed: PlacedOrder | null;
+  submitting: boolean;
 }
 
-const SEED_ORDERS: PastOrder[] = [
-  {
-    orderNo: "#LS-2388",
-    date: "2 August · 21:10",
-    mode: "table",
-    where: "Table 6",
-    lines: [
-      { key: bagKey("muhammara", [], ""), id: "muhammara", qty: 2, excl: [], note: "" },
-      { key: bagKey("adana", [], ""), id: "adana", qty: 1, excl: [], note: "" },
-      { key: bagKey("octopus", [], ""), id: "octopus", qty: 1, excl: [], note: "" },
-      { key: bagKey("turkish", [], ""), id: "turkish", qty: 2, excl: [], note: "" },
-    ],
-    total: 74.2,
-  },
-  {
-    orderNo: "#LS-2301",
-    date: "19 July · 20:05",
-    mode: "online",
-    where: "Delivery",
-    lines: [
-      { key: bagKey("tagine", [], ""), id: "tagine", qty: 1, excl: [], note: "" },
-      { key: bagKey("fattoush", [], ""), id: "fattoush", qty: 1, excl: [], note: "" },
-      { key: bagKey("lavash", [], ""), id: "lavash", qty: 1, excl: [], note: "" },
-      { key: bagKey("kunefe", [], ""), id: "kunefe", qty: 1, excl: [], note: "" },
-    ],
-    total: 52.9,
-  },
-  {
-    orderNo: "#LS-2255",
-    date: "3 July · 13:40",
-    mode: "online",
-    where: "Delivery",
-    lines: [
-      { key: bagKey("hummus", [], ""), id: "hummus", qty: 1, excl: [], note: "" },
-      { key: bagKey("taouk", [], ""), id: "taouk", qty: 1, excl: [], note: "" },
-      { key: bagKey("mint", [], ""), id: "mint", qty: 1, excl: [], note: "" },
-    ],
-    total: 31.5,
-  },
-];
-
 const INITIAL: State = {
-  mode: "online",
+  mode: "pickup",
+  tableId: "",
   tableLabel: "",
   bag: [],
   favs: {},
   promo: "",
-  promoOn: false,
+  promoPercent: 0,
   promoMsg: "",
   split: 1,
   pay: "card",
@@ -109,23 +61,23 @@ const INITIAL: State = {
   cvc: "",
   cardMsg: "",
   tip: 0.1,
-  addr: { street: "", city: "", phone: "", note: "" },
-  when: "asap",
+  customerName: "",
+  customerPhone: "",
+  pickupAt: "asap",
+  pickupMsg: "",
   placed: null,
-  orders: SEED_ORDERS,
+  submitting: false,
 };
 
 type Action =
   | { type: "hydrate"; value: Partial<State> }
-  | { type: "setMode"; mode: Mode; tableLabel?: string }
+  | { type: "setMode"; mode: Mode; tableId?: string; tableLabel?: string }
   | { type: "add"; id: string; qty: number; excl: string[]; note: string }
   | { type: "bump"; key: string; delta: number }
   | { type: "setBag"; bag: BagLine[] }
   | { type: "toggleFav"; id: string }
   | { type: "field"; patch: Partial<State> }
-  | { type: "applyPromo" }
-  | { type: "addr"; patch: Partial<Address> }
-  | { type: "placeOrder"; order: PastOrder }
+  | { type: "orderPlaced"; order: PlacedOrder }
   | { type: "resetOrder" };
 
 function reducer(s: State, a: Action): State {
@@ -133,7 +85,12 @@ function reducer(s: State, a: Action): State {
     case "hydrate":
       return { ...s, ...a.value };
     case "setMode":
-      return { ...s, mode: a.mode, tableLabel: a.tableLabel ?? (a.mode === "table" ? s.tableLabel : "") };
+      return {
+        ...s,
+        mode: a.mode,
+        tableId: a.mode === "table" ? (a.tableId ?? s.tableId) : "",
+        tableLabel: a.mode === "table" ? (a.tableLabel ?? s.tableLabel) : "",
+      };
     case "add":
       return { ...s, bag: addLine(s.bag, a.id, a.qty, a.excl, a.note) };
     case "bump":
@@ -144,49 +101,53 @@ function reducer(s: State, a: Action): State {
       return { ...s, favs: { ...s.favs, [a.id]: !s.favs[a.id] } };
     case "field":
       return { ...s, ...a.patch };
-    case "applyPromo": {
-      const { valid, message } = validatePromo(s.promo);
-      return { ...s, promoOn: valid, promoMsg: message };
-    }
-    case "addr":
-      return { ...s, addr: { ...s.addr, ...a.patch } };
-    case "placeOrder":
+    /* The bag empties the moment the kitchen accepts the order, not when the
+       guest taps "Back to the menu" — close the tab on the confirmation screen
+       and you must not come back to a bag you already paid for. */
+    case "orderPlaced":
       return {
         ...s,
         placed: a.order,
-        orders: [a.order, ...s.orders],
-        cardMsg: "",
-        card: "",
-        exp: "",
-        cvc: "",
-      };
-    case "resetOrder":
-      return {
-        ...s,
         bag: [],
         promo: "",
-        promoOn: false,
+        promoPercent: 0,
         promoMsg: "",
         split: 1,
         tip: 0.1,
-        placed: null,
+        card: "",
+        exp: "",
+        cvc: "",
+        cardMsg: "",
+        pickupAt: "asap",
+        pickupMsg: "",
+        submitting: false,
       };
+    case "resetOrder":
+      return { ...s, placed: null, submitting: false };
     default:
       return s;
   }
 }
 
-const STORAGE_KEY = "levant-sofra/v1";
+const STORAGE_KEY = "levant-sofra/v3";
 
-/** Card fields are deliberately never written to storage. */
+/**
+ * Card fields are deliberately never written to storage, and neither is the
+ * placed order — a confirmation screen must come from the server's answer, not
+ * from something a browser kept lying around.
+ *
+ * Favourites stay on the device on purpose: a QR guest has no account, so there
+ * is no identity to hang a server-side favourites list on.
+ */
 function persistable(s: State) {
   return {
     mode: s.mode,
+    tableId: s.tableId,
     tableLabel: s.tableLabel,
     bag: s.bag,
     favs: s.favs,
-    addr: s.addr,
-    orders: s.orders,
+    customerName: s.customerName,
+    customerPhone: s.customerPhone,
   };
 }
 
@@ -194,15 +155,14 @@ interface Store {
   state: State;
   totals: Totals;
   hydrated: boolean;
-  setMode: (mode: Mode, tableLabel?: string) => void;
+  setMode: (mode: Mode, tableId?: string, tableLabel?: string) => void;
   add: (id: string, qty?: number, excl?: string[], note?: string) => void;
   bump: (key: string, delta: number) => void;
   setBag: (bag: BagLine[]) => void;
   toggleFav: (id: string) => void;
   set: <K extends keyof State>(key: K, value: State[K]) => void;
-  applyPromo: () => void;
-  setAddr: (patch: Partial<Address>) => void;
-  placeOrder: (order: PastOrder) => void;
+  patch: (value: Partial<State>) => void;
+  orderPlaced: (order: PlacedOrder) => void;
   resetOrder: () => void;
 }
 
@@ -211,6 +171,7 @@ const Ctx = createContext<Store | null>(null);
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(reducer, INITIAL);
   const [hydrated, setHydrated] = useState(false);
+  const { prices } = useMenu();
 
   useEffect(() => {
     try {
@@ -227,27 +188,36 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     try {
       window.localStorage.setItem(STORAGE_KEY, JSON.stringify(persistable(state)));
     } catch {
-      // Private mode / quota — the session still works, it just won't survive a reload.
+      // Private mode / quota — the session works, it just won't survive a reload.
     }
   }, [state, hydrated]);
+
+  /* A dish removed from the menu must not sit in the bag pricing at zero. */
+  useEffect(() => {
+    if (!hydrated || state.bag.length === 0) return;
+    if (state.bag.some((l) => prices[l.id] === undefined)) {
+      dispatch({ type: "setBag", bag: state.bag.filter((l) => prices[l.id] !== undefined) });
+    }
+  }, [hydrated, state.bag, prices]);
 
   const totals = useMemo(
     () =>
       computeTotals({
+        prices,
         bag: state.bag,
         mode: state.mode,
-        promoOn: state.promoOn,
+        percentOff: state.promoPercent,
         tip: state.tip,
         split: state.split,
       }),
-    [state.bag, state.mode, state.promoOn, state.tip, state.split],
+    [prices, state.bag, state.mode, state.promoPercent, state.tip, state.split],
   );
 
-  /* Every action keeps a stable identity — components put them in effect
-     dependency lists, and a changing identity there is an infinite loop. */
+  /* Stable identities — components put these in effect dependency lists. */
   const actions = useMemo(
     () => ({
-      setMode: (mode: Mode, tableLabel?: string) => dispatch({ type: "setMode", mode, tableLabel }),
+      setMode: (mode: Mode, tableId?: string, tableLabel?: string) =>
+        dispatch({ type: "setMode", mode, tableId, tableLabel }),
       add: (id: string, qty = 1, excl: string[] = [], note = "") =>
         dispatch({ type: "add", id, qty, excl, note }),
       bump: (key: string, delta: number) => dispatch({ type: "bump", key, delta }),
@@ -255,9 +225,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       toggleFav: (id: string) => dispatch({ type: "toggleFav", id }),
       set: <K extends keyof State>(key: K, value: State[K]) =>
         dispatch({ type: "field", patch: { [key]: value } as Partial<State> }),
-      applyPromo: () => dispatch({ type: "applyPromo" }),
-      setAddr: (patch: Partial<Address>) => dispatch({ type: "addr", patch }),
-      placeOrder: (order: PastOrder) => dispatch({ type: "placeOrder", order }),
+      patch: (value: Partial<State>) => dispatch({ type: "field", patch: value }),
+      orderPlaced: (order: PlacedOrder) => dispatch({ type: "orderPlaced", order }),
       resetOrder: () => dispatch({ type: "resetOrder" }),
     }),
     [],

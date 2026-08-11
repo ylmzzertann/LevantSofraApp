@@ -1,5 +1,8 @@
 import type { Metadata, Viewport } from "next";
 import { Bodoni_Moda, Work_Sans } from "next/font/google";
+import { RESTAURANT } from "@/config/restaurant";
+import { getMenu } from "@/server/menu";
+import { MenuProvider } from "@/state/menu";
 import { StoreProvider } from "@/state/store";
 import "./globals.css";
 
@@ -19,10 +22,14 @@ const ui = Work_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Levant Sofra — Mezze · Fire · Sea",
+  title: `${RESTAURANT.name} — ${RESTAURANT.eyebrow}`,
   description:
-    "Eastern-Mediterranean mezze, charcoal grill and clay pot in Kadıköy. Order from your table or have the same menu delivered.",
+    "Eastern-Mediterranean mezze, charcoal grill and clay pot in Miami. Order from your table or have the same menu delivered.",
 };
+
+/* The menu is live data — a dish can go off mid-service — so pages render per
+   request and the caching happens around the query, not around the build. */
+export const dynamic = "force-dynamic";
 
 export const viewport: Viewport = {
   themeColor: "#FFF6E5",
@@ -31,11 +38,17 @@ export const viewport: Viewport = {
   viewportFit: "cover",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  // Fetched once on the server so the first paint already has the menu, then
+  // kept current client-side by MenuProvider.
+  const categories = await getMenu();
+
   return (
     <html lang="en" className={`${display.variable} ${ui.variable}`}>
       <body>
-        <StoreProvider>{children}</StoreProvider>
+        <MenuProvider initial={categories}>
+          <StoreProvider>{children}</StoreProvider>
+        </MenuProvider>
       </body>
     </html>
   );

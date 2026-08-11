@@ -1,0 +1,628 @@
+/* Back of house. Same palette as the guest app, but denser and built for a
+   tablet on a shelf in a hot room: bigger hit areas, no decoration. */
+
+.shell {
+  min-height: 100dvh;
+  background: var(--backdrop);
+  background-image: url("/grain.png");
+  background-size: 160px 160px;
+  background-attachment: fixed;
+}
+
+.bar {
+  background: var(--ink);
+  color: var(--cream);
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.barTitle {
+  font: italic 600 20px/1 var(--font-display), serif;
+}
+
+.barLinks {
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.barLink {
+  font: 500 12px var(--font-ui), sans-serif;
+  letter-spacing: 0.04em;
+  color: rgba(255, 246, 229, 0.7);
+  padding: 9px 14px;
+  border-radius: var(--r-pill);
+  border: 1px solid transparent;
+}
+
+.barLink[data-active="true"] {
+  color: var(--cream);
+  border-color: rgba(255, 246, 229, 0.35);
+}
+
+.page {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 28px 24px 80px;
+}
+
+.heading {
+  font: italic 500 27px/1 var(--font-display), serif;
+  color: var(--ink);
+  margin: 0 0 6px;
+}
+
+.sub {
+  font: 400 12.5px/1.6 var(--font-ui), sans-serif;
+  color: var(--ink-55);
+  margin: 0 0 24px;
+  max-width: 640px;
+  text-wrap: pretty;
+}
+
+.warning {
+  border: 1px solid rgba(192, 75, 45, 0.4);
+  background: rgba(192, 75, 45, 0.08);
+  color: var(--terracotta);
+  border-radius: var(--r-card);
+  padding: 12px 14px;
+  font: 400 12px/1.5 var(--font-ui), sans-serif;
+  margin-bottom: 22px;
+  text-wrap: pretty;
+}
+
+.card {
+  background: rgba(255, 246, 229, 0.92);
+  border: 1px solid rgba(59, 59, 59, 0.13);
+  border-radius: var(--r-card);
+  padding: 20px;
+  margin-bottom: 18px;
+}
+
+.sectionTitle {
+  font: italic 500 20px/1 var(--font-display), serif;
+  color: var(--ink);
+  margin: 0 0 14px;
+}
+
+/* Dish list */
+.dishRow {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--rule-row);
+}
+
+.dishThumb {
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-thumb);
+  background: rgba(192, 75, 45, 0.11);
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.dishThumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dishMain {
+  flex: 1;
+  min-width: 0;
+}
+
+.dishName {
+  font: 500 15px var(--font-display), serif;
+  color: var(--ink);
+}
+
+.dishMeta {
+  font: 400 11.5px var(--font-ui), sans-serif;
+  color: var(--ink-55);
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dishRow[data-available="false"] .dishName,
+.dishRow[data-available="false"] .dishMeta {
+  opacity: 0.45;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex: none;
+}
+
+.btn {
+  font: 500 12px var(--font-ui), sans-serif;
+  padding: 10px 14px;
+  border-radius: var(--r-pill);
+  border: 1px solid var(--rule-strong);
+  color: var(--ink);
+  background: transparent;
+  cursor: pointer;
+  min-height: 40px;
+  white-space: nowrap;
+}
+
+.btn:hover {
+  border-color: rgba(59, 59, 59, 0.45);
+}
+
+.btnDanger {
+  border-color: rgba(192, 75, 45, 0.45);
+  color: var(--terracotta);
+}
+
+.btnPrimary {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--cream);
+}
+
+/* `86` is the kitchen word for a dish that has run out. */
+.toggle {
+  font: 600 11px var(--font-ui), sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 10px 14px;
+  border-radius: var(--r-pill);
+  border: 1px solid;
+  cursor: pointer;
+  min-height: 40px;
+  min-width: 96px;
+  background: transparent;
+}
+
+.toggle[data-available="true"] {
+  border-color: rgba(107, 138, 74, 0.5);
+  background: rgba(107, 138, 74, 0.12);
+  color: var(--olive);
+}
+
+.toggle[data-available="false"] {
+  border-color: rgba(192, 75, 45, 0.5);
+  background: rgba(192, 75, 45, 0.1);
+  color: var(--terracotta);
+}
+
+/* Form */
+.form {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px 20px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+}
+
+.fieldWide {
+  grid-column: 1 / -1;
+}
+
+.input,
+.select,
+.textarea {
+  margin-top: 8px;
+  background: rgba(255, 255, 255, 0.5);
+  border: 1px solid var(--rule-strong);
+  border-radius: 5px;
+  padding: 10px 12px;
+  font: 400 13.5px var(--font-ui), sans-serif;
+  color: var(--ink);
+  min-height: 44px;
+}
+
+.textarea {
+  min-height: 76px;
+  resize: vertical;
+}
+
+.hint {
+  font: 400 11px/1.5 var(--font-ui), sans-serif;
+  color: var(--ink-45);
+  margin-top: 6px;
+}
+
+.checkRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  font: 400 13px var(--font-ui), sans-serif;
+  color: var(--ink);
+}
+
+.error {
+  grid-column: 1 / -1;
+  font: 400 12px var(--font-ui), sans-serif;
+  color: var(--terracotta);
+}
+
+.formFooter {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* Login */
+.login {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.loginCard {
+  width: 100%;
+  max-width: 360px;
+  background: var(--cream);
+  border-radius: var(--r-sheet);
+  padding: 30px 26px;
+  box-shadow: var(--shadow-sheet);
+  text-align: center;
+}
+
+/* Kitchen board */
+.board {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  gap: 16px;
+}
+
+.ticket {
+  background: var(--paper);
+  border: 1px solid var(--rule-section);
+  border-radius: var(--r-card);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ticket[data-status="in_kitchen"] {
+  border-color: rgba(225, 164, 60, 0.6);
+  box-shadow: inset 3px 0 0 var(--mustard);
+}
+
+.ticket[data-status="ready"] {
+  border-color: rgba(107, 138, 74, 0.6);
+  box-shadow: inset 3px 0 0 var(--olive);
+}
+
+.ticketTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.ticketNo {
+  font: 600 13px var(--font-ui), sans-serif;
+  letter-spacing: 0.06em;
+  color: var(--ink);
+}
+
+.ticketWhere {
+  font: 600 9.5px var(--font-ui), sans-serif;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: var(--r-tag);
+}
+
+.ticketWhere[data-mode="table"] {
+  color: var(--olive);
+  background: rgba(107, 138, 74, 0.12);
+}
+
+.ticketWhere[data-mode="online"] {
+  color: var(--terracotta);
+  background: rgba(192, 75, 45, 0.1);
+}
+
+.ticketTime {
+  font: 400 11px var(--font-ui), sans-serif;
+  color: var(--ink-50);
+}
+
+/* The six digits the guest will be holding up. */
+.ticketCode {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 8px 10px;
+  border-radius: 5px;
+  background: rgba(107, 138, 74, 0.12);
+  border: 1px solid rgba(107, 138, 74, 0.35);
+}
+
+.ticketCodeDigits {
+  font: 600 20px var(--font-ui), sans-serif;
+  letter-spacing: 0.14em;
+  font-variant-numeric: tabular-nums;
+  color: var(--olive);
+}
+
+.ticketCodeMeta {
+  font: 400 11.5px var(--font-ui), sans-serif;
+  color: var(--ink-62);
+}
+
+/* Counter lookup */
+.lookup {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  flex-wrap: wrap;
+  background: rgba(255, 246, 229, 0.92);
+  border: 1px solid rgba(59, 59, 59, 0.13);
+  border-radius: var(--r-card);
+  padding: 14px 16px;
+  margin-bottom: 18px;
+}
+
+.lookupInput {
+  flex: 1;
+  min-width: 180px;
+  background: rgba(255, 255, 255, 0.6);
+  border: 1px solid var(--rule-strong);
+  border-radius: 5px;
+  padding: 10px 12px;
+  font: 500 16px var(--font-ui), sans-serif;
+  letter-spacing: 0.12em;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  min-height: 44px;
+}
+
+.ticketLine {
+  padding: 8px 0;
+  border-top: 1px solid var(--rule-row);
+}
+
+.ticketDish {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  font: 600 12.5px var(--font-ui), sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.ticketExcl {
+  font: 600 11.5px var(--font-ui), sans-serif;
+  color: var(--terracotta);
+  margin-top: 4px;
+  letter-spacing: 0.03em;
+}
+
+.ticketNote {
+  font: italic 400 11.5px var(--font-ui), sans-serif;
+  color: var(--ink-55);
+  margin-top: 3px;
+}
+
+.ticketActions {
+  display: flex;
+  gap: 8px;
+  margin-top: auto;
+  padding-top: 6px;
+}
+
+.ticketActions .btn {
+  flex: 1;
+}
+
+/* --- The floor ------------------------------------------------------------ */
+
+.floorSummary {
+  display: flex;
+  gap: 24px;
+  flex-wrap: wrap;
+  font: 400 12.5px var(--font-ui), sans-serif;
+  color: var(--ink-62);
+  margin-bottom: 16px;
+}
+
+.floor {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin-bottom: 22px;
+}
+
+.tableCard {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+  padding: 14px;
+  border-radius: var(--r-card);
+  border: 1px solid rgba(59, 59, 59, 0.16);
+  background: rgba(255, 246, 229, 0.6);
+  cursor: pointer;
+  min-height: 84px;
+  text-align: left;
+}
+
+.tableCard[data-seated="true"] {
+  border-color: rgba(107, 138, 74, 0.5);
+  background: rgba(107, 138, 74, 0.1);
+}
+
+.tableCard[data-selected="true"] {
+  outline: 2px solid var(--ink);
+  outline-offset: -2px;
+}
+
+.tableLabel {
+  font: 500 15px var(--font-display), serif;
+  color: var(--ink);
+}
+
+.tableTotal {
+  font: 500 20px var(--font-display), serif;
+  color: var(--ink);
+}
+
+.tableMeta {
+  font: 400 11px var(--font-ui), sans-serif;
+  color: var(--ink-55);
+}
+
+.tableFree {
+  font: 400 11.5px var(--font-ui), sans-serif;
+  color: var(--ink-45);
+}
+
+.tabHead {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.tabTotals {
+  display: flex;
+  gap: 20px;
+  font: 400 12.5px var(--font-ui), sans-serif;
+  color: var(--ink-62);
+}
+
+.rollup {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding-bottom: 14px;
+  margin-bottom: 4px;
+  border-bottom: 1px dashed var(--rule-dashed);
+}
+
+.rollupItem {
+  font: 500 11.5px var(--font-ui), sans-serif;
+  color: var(--ink);
+  background: rgba(59, 59, 59, 0.07);
+  border-radius: var(--r-pill);
+  padding: 5px 10px;
+}
+
+.round {
+  padding: 12px 0;
+  border-bottom: 1px solid var(--rule-row);
+}
+
+.roundHead {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.roundNo {
+  font: 600 12px var(--font-ui), sans-serif;
+  letter-spacing: 0.05em;
+  color: var(--ink);
+}
+
+.roundBadge {
+  font: 600 9px var(--font-ui), sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: var(--r-tag);
+  background: rgba(59, 59, 59, 0.08);
+  color: var(--ink-62);
+}
+
+.roundBadge[data-channel="staff"] {
+  background: rgba(225, 164, 60, 0.18);
+  color: #8a6117;
+}
+
+.roundBadge[data-payment="paid"] {
+  background: rgba(107, 138, 74, 0.16);
+  color: var(--olive);
+}
+
+.roundBadge[data-payment="on_tab"] {
+  background: rgba(192, 75, 45, 0.12);
+  color: var(--terracotta);
+}
+
+.roundTotal {
+  margin-left: auto;
+  font: 500 15px var(--font-display), serif;
+  color: var(--ink);
+}
+
+.roundLine {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font: 400 12.5px var(--font-ui), sans-serif;
+  color: var(--ink-70);
+  padding: 5px 0 0;
+}
+
+.ringIn {
+  margin-top: 20px;
+  padding-top: 18px;
+  border-top: 1px dashed var(--rule-dashed);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.draft {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.draftLine {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  font: 400 13.5px var(--font-ui), sans-serif;
+  color: var(--ink);
+  padding: 8px 0;
+  border-bottom: 1px solid var(--rule-row);
+}
+
+.emptyBoard {
+  font: 400 14px/1.6 var(--font-ui), sans-serif;
+  color: var(--ink-55);
+  padding: 40px 0;
+  text-align: center;
+}

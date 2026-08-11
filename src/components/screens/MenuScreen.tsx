@@ -30,7 +30,7 @@ export function MenuScreen() {
           </div>
           <div className={s.mode} data-mode={state.mode}>
             <div className={s.dot} />
-            <span className={s.modeText}>{table ? state.tableLabel || "Table" : "Delivery"}</span>
+            <span className={s.modeText}>{table ? state.tableLabel || "Table" : "Pickup"}</span>
           </div>
         </div>
         <CategoryChips variant="mobile" onJump={jump} />

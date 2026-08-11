@@ -1,5 +1,3 @@
-import { DISHES } from "@/data/menu";
-
 export interface BagLine {
   key: string;
   id: string;
@@ -54,10 +52,6 @@ export function bagCount(bag: BagLine[]): number {
 /** Total quantity of a dish across every line, including lines with exclusions. */
 export function countOfDish(bag: BagLine[], id: string): number {
   return bag.filter((l) => l.id === id).reduce((a, l) => a + l.qty, 0);
-}
-
-export function lineTotal(line: BagLine): number {
-  return DISHES[line.id].price * line.qty;
 }
 
 /** `No walnut, no onion` — the phrasing the kitchen ticket uses. */

@@ -228,18 +228,76 @@
   padding: 14px 24px 24px;
 }
 
+.line[data-available="false"] .lineName,
+.line[data-available="false"] .lineEach {
+  opacity: 0.5;
+}
+
+.splitNote {
+  font: 400 11.5px/1.5 var(--font-ui), sans-serif;
+  color: var(--ink-55);
+  margin-top: 12px;
+  text-align: right;
+  text-wrap: pretty;
+}
+
+/* Why the primary action is disabled — never a dead button with no reason. */
+.blockingNote {
+  font: 400 11.5px/1.5 var(--font-ui), sans-serif;
+  color: var(--terracotta);
+  margin-bottom: 10px;
+  text-wrap: pretty;
+}
+
 .tail {
   height: 22px;
 }
 
-/* --- M5 address ----------------------------------------------------------- */
-
-.map {
-  height: 132px;
-}
+/* --- M5 pickup ------------------------------------------------------------ */
 
 .field {
   margin-top: 18px;
+}
+
+.hint {
+  font: 400 11px var(--font-ui), sans-serif;
+  color: var(--ink-45);
+  margin-top: 6px;
+}
+
+.pickupAddress {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px dashed var(--rule-dashed);
+  border-radius: 5px;
+}
+
+.pickupAddressLine {
+  font: 400 13px/1.5 var(--font-ui), sans-serif;
+  color: var(--ink);
+  margin-top: 6px;
+  text-wrap: pretty;
+}
+
+/* "As soon as possible" is the common case, so it gets the full width and the
+   named slots sit under it as a grid. */
+.asapPill {
+  width: 100%;
+  flex: none;
+  margin-top: 12px;
+}
+
+.slots {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.slot {
+  flex: none;
+  padding: 9px 0;
+  min-height: 40px;
 }
 
 /* --- M6 payment ----------------------------------------------------------- */
@@ -387,6 +445,45 @@
   font: 400 13.5px/1.6 var(--font-ui), sans-serif;
   color: rgba(59, 59, 59, 0.6);
   margin-top: 12px;
+  text-wrap: pretty;
+}
+
+/* The collection code. Big enough to read at arm's length across a counter,
+   and spaced so nobody misreads a 6 for an 8. */
+.codeCard {
+  margin-top: 26px;
+  border: 1.4px dashed rgba(107, 138, 74, 0.6);
+  background: rgba(107, 138, 74, 0.09);
+  border-radius: var(--r-card);
+  padding: 18px 16px 16px;
+}
+
+.codeLabel {
+  font: 400 9.5px var(--font-ui), sans-serif;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--olive);
+}
+
+.code {
+  font: 500 44px/1 var(--font-display), serif;
+  letter-spacing: 0.14em;
+  color: var(--olive);
+  margin-top: 10px;
+  /* Tabular figures so the digits don't shuffle width to width. */
+  font-variant-numeric: tabular-nums;
+}
+
+.codeMeta {
+  font: 500 12.5px var(--font-ui), sans-serif;
+  color: var(--ink);
+  margin-top: 10px;
+}
+
+.codeAddress {
+  font: 400 11.5px/1.5 var(--font-ui), sans-serif;
+  color: var(--ink-55);
+  margin-top: 4px;
   text-wrap: pretty;
 }
 

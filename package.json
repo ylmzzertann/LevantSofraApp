@@ -7,12 +7,18 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc --noEmit",
-    "grain": "node scripts/make-grain.mjs"
+    "grain": "node scripts/make-grain.mjs",
+    "db:sql": "node scripts/dump-sql.mjs"
   },
   "dependencies": {
+    "@electric-sql/pglite": "^0.5.4",
+    "@supabase/supabase-js": "^2.112.2",
+    "drizzle-orm": "^0.45.2",
     "next": "^15.5.4",
+    "postgres": "^3.4.9",
     "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "react-dom": "^19.1.0",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

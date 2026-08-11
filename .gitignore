@@ -6,3 +6,9 @@ build/
 *.tsbuildinfo
 next-env.d.ts
 .DS_Store
+
+# Older layout: the local database used to live here before it moved out of the
+# synced project folder. Safe to delete.
+.data/
+# Dish photos uploaded without Supabase Storage configured.
+public/uploads/

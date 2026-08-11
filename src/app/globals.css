@@ -194,6 +194,16 @@ a:hover {
   transform: translateY(1px);
 }
 
+.ls-action:disabled {
+  opacity: 0.45;
+  box-shadow: none;
+  cursor: default;
+}
+
+.ls-action:disabled:active {
+  transform: none;
+}
+
 .ls-action span {
   font: 500 14px var(--font-ui), sans-serif;
   color: var(--cream);

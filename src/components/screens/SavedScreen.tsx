@@ -4,17 +4,18 @@ import Link from "next/link";
 import { PlateGlyph } from "@/components/brand/Logo";
 import { Plus } from "@/components/icons";
 import { AppShell, ScreenBody, ScreenHeader, TitleRow } from "@/components/shell/AppShell";
-import { DISHES } from "@/data/menu";
 import { money } from "@/lib/money";
+import { useMenu } from "@/state/menu";
 import { useStore } from "@/state/store";
 import s from "./Lists.module.css";
 
 /** M8 — saved plates. */
 export function SavedScreen() {
+  const { dishes } = useMenu();
   const { state, add } = useStore();
   const saved = Object.keys(state.favs)
-    .filter((id) => state.favs[id] && DISHES[id])
-    .map((id) => DISHES[id]);
+    .filter((id) => state.favs[id] && dishes[id])
+    .map((id) => dishes[id]);
 
   return (
     <AppShell>
@@ -42,6 +43,7 @@ export function SavedScreen() {
                 type="button"
                 className={s.addButton}
                 aria-label={`Add ${dish.name}`}
+                disabled={!dish.available}
                 onClick={() => add(dish.id)}
               >
                 <Plus />
