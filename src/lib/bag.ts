@@ -16,6 +16,13 @@ export function bagKey(id: string, excl: string[], note: string): string {
   return id + (ex.length ? "|" + ex.join(",") : "") + (note ? "|" + note : "");
 }
 
+/**
+ * The most of one line the server will accept. The bag enforces it too: without
+ * a cap here, a guest could step a line past it and only learn at payment, with
+ * an error that didn't say why.
+ */
+export const MAX_LINE_QTY = 50;
+
 export function addLine(
   bag: BagLine[],
   id: string,
@@ -28,7 +35,7 @@ export function addLine(
   const i = bag.findIndex((l) => l.key === key);
   if (i >= 0) {
     const next = bag.slice();
-    next[i] = { ...next[i], qty: next[i].qty + qty };
+    next[i] = { ...next[i], qty: Math.min(MAX_LINE_QTY, next[i].qty + qty) };
     return next;
   }
   return bag.concat([{ key, id, qty, excl: ex, note }]);
@@ -37,7 +44,7 @@ export function addLine(
 /** Quantity changes address the key, never the dish id. */
 export function bumpLine(bag: BagLine[], key: string, delta: number): BagLine[] {
   return bag
-    .map((l) => (l.key === key ? { ...l, qty: l.qty + delta } : l))
+    .map((l) => (l.key === key ? { ...l, qty: Math.min(MAX_LINE_QTY, l.qty + delta) } : l))
     .filter((l) => l.qty > 0);
 }
 

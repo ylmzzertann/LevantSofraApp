@@ -7,8 +7,9 @@ import { PhotoSlot } from "@/components/media/PhotoSlot";
 import { TagChip } from "@/components/menu/TagChip";
 import { AppShell, ScreenBody, ScreenFooter, ScreenHeader } from "@/components/shell/AppShell";
 import type { Dish } from "@/data/menu";
-import { exclusionLine, exclusionValue } from "@/lib/bag";
+import { MAX_LINE_QTY, exclusionLine, exclusionValue } from "@/lib/bag";
 import { money } from "@/lib/money";
+import { useMenu } from "@/state/menu";
 import { useStore } from "@/state/store";
 import s from "./Item.module.css";
 
@@ -24,6 +25,12 @@ export function ItemScreen({ dish }: { dish: Dish }) {
   const [note, setNote] = useState("");
   const [excl, setExcl] = useState<string[]>([]);
   const saved = !!state.favs[dish.id];
+  /* The page was rendered with the dish as it was then; the live menu says
+     whether it has been 86'd since. Either being off means no adding — this
+     screen used to let a sold-out dish into the bag, and the guest only found
+     out at the till. */
+  const { dishes } = useMenu();
+  const available = dish.available && (dishes[dish.id]?.available ?? true);
 
   const toggle = (label: string) => {
     const value = exclusionValue(label);
@@ -131,7 +138,8 @@ export function ItemScreen({ dish }: { dish: Dish }) {
               type="button"
               className={s.stepperBtn}
               aria-label="One more"
-              onClick={() => setQty((q) => q + 1)}
+              disabled={qty >= MAX_LINE_QTY}
+              onClick={() => setQty((q) => Math.min(MAX_LINE_QTY, q + 1))}
             >
               <PlusSmall />
             </button>
@@ -139,12 +147,14 @@ export function ItemScreen({ dish }: { dish: Dish }) {
           <button
             type="button"
             className={`ls-action ${s.add}`}
+            disabled={!available}
             onClick={() => {
+              if (!available) return;
               add(dish.id, qty, excl, note.trim());
               router.push("/");
             }}
           >
-            <span>Add {money(dish.price * qty)}</span>
+            <span>{available ? `Add ${money(dish.price * qty)}` : "Sold out for now"}</span>
           </button>
         </div>
       </ScreenFooter>

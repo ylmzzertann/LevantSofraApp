@@ -18,6 +18,8 @@ import * as schema from "./schema";
  * Server-side only. Nothing here may be imported from a client component.
  */
 
+type PgliteDb = ReturnType<typeof drizzlePglite<typeof schema>>;
+
 export type Db =
   | ReturnType<typeof drizzlePg<typeof schema>>
   | ReturnType<typeof drizzlePglite<typeof schema>>;
@@ -82,13 +84,34 @@ export function resetLocalDb(): void {
  * this file opened PGlite at import time, every worker would open the same
  * single-writer cluster simultaneously and they would trip over each other.
  * Nothing touches the database until a request actually asks for data.
+ *
+ * Typed as one driver's database: both expose the same query API, but a union
+ * of their types makes TypeScript pick the narrowest overload of builders like
+ * `.returning({...})`. The runtime object is whichever driver is configured.
  */
-export const db: Db = new Proxy({} as Db, {
+export const db: PgliteDb = new Proxy({} as PgliteDb, {
   get(_target, prop) {
     const real = getDb() as unknown as Record<string | symbol, unknown>;
     const value = real[prop];
     return typeof value === "function" ? value.bind(real) : value;
   },
 });
+
+/** A transaction handle — the same query API as `db`, all-or-nothing. */
+export type Tx = Parameters<Parameters<PgliteDb["transaction"]>[0]>[0];
+
+/**
+ * Runs `fn` in a transaction. Both drivers expose the same transaction API; the
+ * cast only unifies their two nominal types so callers get one `Tx`.
+ */
+export function transaction<T>(fn: (tx: Tx) => Promise<T>): Promise<T> {
+  return (getDb() as PgliteDb).transaction(fn);
+}
+
+/** Raw `db.execute` results: postgres-js hands back an array, PGlite `{ rows }`. */
+export function rowsOf<T>(result: unknown): T[] {
+  if (Array.isArray(result)) return result as T[];
+  return ((result as { rows?: T[] })?.rows ?? []) as T[];
+}
 
 export { schema };

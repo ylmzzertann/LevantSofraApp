@@ -10,20 +10,23 @@ import { useStore } from "@/state/store";
 import s from "./Entry.module.css";
 
 /**
- * M1. Reached by scanning the sticker on a table, so the table number arrives
- * in the URL. Result: mode = 'table' (with the table) or mode = 'online'.
+ * M1. Reached by scanning the sticker on a table. The page has already checked
+ * the sticker's signature on the server: `tableKey` is the verified signature,
+ * or null when the code is missing, forged or for a table that's out of service.
  */
-export function EntryScreen({ table }: { table: string }) {
+export function EntryScreen({ table, tableKey }: { table: string; tableKey: string | null }) {
   const router = useRouter();
   const { setMode, hydrated } = useStore();
   const label = `Table ${table}`;
+  const valid = tableKey !== null;
 
   /* The scan itself is the signal — record it before the guest touches
      anything, but only once the stored session has loaded, or the restore
-     would overwrite the table we just detected. */
+     would overwrite the table we just detected. An invalid code records
+     nothing. */
   useEffect(() => {
-    if (hydrated) setMode("table", table, label);
-  }, [hydrated, setMode, table, label]);
+    if (hydrated && tableKey) setMode("table", table, label, tableKey);
+  }, [hydrated, setMode, table, label, tableKey]);
 
   return (
     <AppShell>
@@ -34,24 +37,34 @@ export function EntryScreen({ table }: { table: string }) {
         <div className={s.wordmark}>{RESTAURANT.name}</div>
         <div className={s.eyebrow}>{RESTAURANT.eyebrow}</div>
 
-        <div className={s.tableCard}>
-          <div className={s.stamp}>QR SCANNED</div>
-          <div className={s.seatedAt}>You&rsquo;re seated at</div>
-          <div className={s.tableNo}>{label}</div>
-          <button
-            type="button"
-            className={s.open}
-            onClick={() => {
-              setMode("table", table, label);
-              router.push("/");
-            }}
-          >
-            <span>Open the menu</span>
-            <div className={s.openChip}>
-              <ArrowOut size={12} width={1.6} />
+        {valid ? (
+          <div className={s.tableCard}>
+            <div className={s.stamp}>QR SCANNED</div>
+            <div className={s.seatedAt}>You&rsquo;re seated at</div>
+            <div className={s.tableNo}>{label}</div>
+            <button
+              type="button"
+              className={s.open}
+              onClick={() => {
+                setMode("table", table, label, tableKey);
+                router.push("/");
+              }}
+            >
+              <span>Open the menu</span>
+              <div className={s.openChip}>
+                <ArrowOut size={12} width={1.6} />
+              </div>
+            </button>
+          </div>
+        ) : (
+          <div className={s.tableCard} data-invalid="true">
+            <div className={s.stamp}>CODE NOT RECOGNISED</div>
+            <div className={s.seatedAt}>
+              This link doesn&rsquo;t match a table&rsquo;s code. Scan the sticker on your table
+              again, or ask one of us to take your order.
             </div>
-          </button>
-        </div>
+          </div>
+        )}
 
         <div className={s.or}>
           <div className={s.orRule} />

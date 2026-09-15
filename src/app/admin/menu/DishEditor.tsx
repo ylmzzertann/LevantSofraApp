@@ -1,9 +1,10 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useRef } from "react";
 import type { Dish } from "@/data/menu";
 import { saveDish } from "@/server/admin-actions";
-import s from "./admin.module.css";
+import { useFormAction } from "../useFormAction";
+import s from "../admin.module.css";
 
 interface CategoryOption {
   key: string;
@@ -36,16 +37,23 @@ export function DishEditor({
   dish?: Dish;
   onDone?: () => void;
 }) {
-  const [error, action, pending] = useActionState(saveDish, null);
   const form = useRef<HTMLFormElement>(null);
   const editing = !!dish;
 
-  useEffect(() => {
-    if (!pending && error === null && form.current && !editing) form.current.reset();
-  }, [pending, error, editing]);
+  /* A new dish clears the form for the next one; an edit closes the editor so
+     the list shows the saved values rather than a form reset to stale ones. */
+  const { error, pending, onSubmit } = useFormAction(saveDish, (el) => {
+    if (editing) onDone?.();
+    else {
+      el.reset();
+      const idField = el.elements.namedItem("id") as HTMLInputElement | null;
+      if (idField) delete idField.dataset.touched;
+    }
+  });
 
   return (
-    <form action={action} ref={form} className={s.form}>
+    <form onSubmit={onSubmit} ref={form} className={s.form}>
+      <input type="hidden" name="mode" value={editing ? "edit" : "create"} />
       <div className={s.field}>
         <label className="ls-label" htmlFor={`name-${dish?.id ?? "new"}`}>
           Name

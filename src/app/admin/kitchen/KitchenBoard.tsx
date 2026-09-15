@@ -12,14 +12,19 @@ const POLL_MS = 4000;
  * The ticket board. It polls rather than holding a socket open: a display on a
  * shelf in a kitchen loses its network, and polling reconnects by itself.
  */
-export function KitchenBoard() {
+export function KitchenBoard({ owner }: { owner: boolean }) {
   const [orders, setOrders] = useState<OrderSummary[] | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
   const [code, setCode] = useState("");
 
   const load = useCallback(async () => {
     try {
       const res = await fetch("/api/kitchen", { cache: "no-store" });
+      if (res.status === 401) {
+        window.location.href = "/admin/login";
+        return;
+      }
       if (!res.ok) return;
       const data = (await res.json()) as { orders: OrderSummary[] };
       setOrders(data.orders ?? []);
@@ -34,18 +39,36 @@ export function KitchenBoard() {
     return () => clearInterval(id);
   }, [load]);
 
-  const advance = async (orderNo: string, status: OrderStatus) => {
+  const post = async (orderNo: string, body: Record<string, unknown>) => {
     setBusy(orderNo);
+    setError(null);
     try {
-      await fetch("/api/kitchen", {
+      const res = await fetch("/api/kitchen", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ orderNo, status }),
+        body: JSON.stringify({ orderNo, ...body }),
       });
+      const data = (await res.json()) as { ok?: boolean; error?: string };
+      if (!data.ok) setError(data.error ?? "That didn't go through.");
       await load();
+    } catch {
+      setError("Couldn't reach the server.");
     } finally {
       setBusy(null);
     }
+  };
+
+  const advance = (orderNo: string, status: OrderStatus) => post(orderNo, { action: "status", status });
+
+  const voidTicket = (order: OrderSummary) => {
+    const paid = order.paymentStatus === "paid";
+    const reason = prompt(
+      paid
+        ? `Void ${order.orderNo}? The guest paid ${money(order.total)} — it will need refunding. Reason:`
+        : `Void ${order.orderNo}? Reason:`,
+    );
+    if (reason === null) return;
+    void post(order.orderNo, { action: "void", reason });
   };
 
   /* Someone is standing at the counter holding six digits. Typing them should
@@ -79,6 +102,8 @@ export function KitchenBoard() {
         )}
       </div>
 
+      {error && <div className={s.warning}>{error}</div>}
+
       {shown === null ? (
         <p className={s.emptyBoard}>Loading the pass…</p>
       ) : shown.length === 0 ? (
@@ -88,7 +113,11 @@ export function KitchenBoard() {
       ) : (
         <div className={s.board}>
           {shown.map((o) => (
-            <div key={o.orderNo} className={s.ticket} data-status={o.status}>
+            <div key={o.orderNo} className={s.ticket} data-status={o.status} data-voided={o.voided}>
+              {o.voided && (
+                <div className={s.voidBanner}>Voided — stop{o.voidReason ? ` · ${o.voidReason}` : ""}</div>
+              )}
+
               <div className={s.ticketTop}>
                 <span className={s.ticketNo}>{o.orderNo}</span>
                 <span className={s.ticketWhere} data-mode={o.mode}>
@@ -96,7 +125,7 @@ export function KitchenBoard() {
                 </span>
               </div>
 
-              {o.pickupCode && (
+              {o.pickupCode && !o.voided && (
                 <div className={s.ticketCode}>
                   <span className={s.ticketCodeDigits}>{o.pickupCode}</span>
                   <span className={s.ticketCodeMeta}>
@@ -113,10 +142,13 @@ export function KitchenBoard() {
               <div>
                 {o.lines.map((l, i) => (
                   <div key={`${l.dishId}-${i}`} className={s.ticketLine}>
-                    <div className={s.ticketDish}>
-                      <span>{l.qty}×</span>
+                    <div className={`${s.ticketDish} ${l.qty === 0 ? s.struck : ""}`}>
+                      <span>{l.qty === 0 ? l.voidedQty : l.qty}×</span>
                       <span>{l.name}</span>
                     </div>
+                    {l.voidedQty > 0 && l.qty > 0 && (
+                      <div className={s.ticketExcl}>{l.voidedQty} taken off — make {l.qty}</div>
+                    )}
                     {l.exclusions.length > 0 && (
                       <div className={s.ticketExcl}>{exclusionLine(l.exclusions)}</div>
                     )}
@@ -125,36 +157,49 @@ export function KitchenBoard() {
                 ))}
               </div>
 
-              <div className={s.ticketActions}>
-                {o.status === "placed" && (
+              {!o.voided && (
+                <div className={s.ticketActions}>
+                  {o.status === "placed" && (
+                    <button
+                      type="button"
+                      className={s.btn}
+                      disabled={busy === o.orderNo}
+                      onClick={() => advance(o.orderNo, "in_kitchen")}
+                    >
+                      Start
+                    </button>
+                  )}
+                  {o.status === "in_kitchen" && (
+                    <button
+                      type="button"
+                      className={s.btn}
+                      disabled={busy === o.orderNo}
+                      onClick={() => advance(o.orderNo, "ready")}
+                    >
+                      Ready
+                    </button>
+                  )}
                   <button
                     type="button"
-                    className={s.btn}
+                    className={`${s.btn} ${s.btnPrimary}`}
                     disabled={busy === o.orderNo}
-                    onClick={() => advance(o.orderNo, "in_kitchen")}
+                    onClick={() => advance(o.orderNo, "completed")}
                   >
-                    Start
+                    {o.mode === "pickup" ? "Handed over" : "Done"}
                   </button>
-                )}
-                {o.status === "in_kitchen" && (
-                  <button
-                    type="button"
-                    className={s.btn}
-                    disabled={busy === o.orderNo}
-                    onClick={() => advance(o.orderNo, "ready")}
-                  >
-                    Ready
-                  </button>
-                )}
-                <button
-                  type="button"
-                  className={`${s.btn} ${s.btnPrimary}`}
-                  disabled={busy === o.orderNo}
-                  onClick={() => advance(o.orderNo, "completed")}
-                >
-                  {o.mode === "pickup" ? "Handed over" : "Done"}
-                </button>
-              </div>
+                  {/* Voiding a paid order is a refund — owners only; the server enforces it too. */}
+                  {(owner || o.paymentStatus !== "paid") && (
+                    <button
+                      type="button"
+                      className={`${s.btn} ${s.btnDanger}`}
+                      disabled={busy === o.orderNo}
+                      onClick={() => voidTicket(o)}
+                    >
+                      Void
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           ))}
         </div>

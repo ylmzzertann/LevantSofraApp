@@ -1,0 +1,76 @@
+/* Error, not-found and offline states. Same paper, same type, calmer voice. */
+
+.wrap {
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 24px;
+  background: var(--cream);
+}
+
+.card {
+  max-width: 380px;
+  text-align: center;
+}
+
+.title {
+  font: italic 500 28px/1.15 var(--font-display), serif;
+  color: var(--ink);
+  margin: 18px 0 10px;
+}
+
+.body {
+  font: 400 13.5px/1.6 var(--font-ui), sans-serif;
+  color: var(--ink-62);
+  margin: 0 0 22px;
+  text-wrap: pretty;
+}
+
+.actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 20px;
+  border-radius: var(--r-pill);
+  border: 1px solid rgba(59, 59, 59, 0.25);
+  background: transparent;
+  font: 500 13px var(--font-ui), sans-serif;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.btnPrimary {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--cream);
+}
+
+.digest {
+  margin-top: 18px;
+  font: 400 10.5px var(--font-ui), sans-serif;
+  color: var(--ink-42);
+}
+
+/* Pinned above everything, and out of the way of the bag bar at the bottom. */
+.offline {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  padding: 8px 16px calc(8px + env(safe-area-inset-top, 0px));
+  background: var(--ink);
+  color: var(--cream);
+  font: 500 12px var(--font-ui), sans-serif;
+  text-align: center;
+  animation: ls-rise 0.35s var(--ease) both;
+}

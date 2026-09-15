@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Bodoni_Moda, Work_Sans } from "next/font/google";
+import { OfflineBanner } from "@/components/system/OfflineBanner";
 import { RESTAURANT } from "@/config/restaurant";
 import { getMenu } from "@/server/menu";
 import { MenuProvider } from "@/state/menu";
@@ -47,7 +48,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="en" className={`${display.variable} ${ui.variable}`}>
       <body>
         <MenuProvider initial={categories}>
-          <StoreProvider>{children}</StoreProvider>
+          <StoreProvider>
+            <OfflineBanner />
+            {children}
+          </StoreProvider>
         </MenuProvider>
       </body>
     </html>

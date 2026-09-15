@@ -44,6 +44,7 @@ export function PayScreen() {
         body: JSON.stringify({
           mode: state.mode,
           tableId: state.tableId || undefined,
+          tableKey: state.tableKey || undefined,
           lines: state.bag.map((l) => ({
             dishId: l.id,
             qty: l.qty,
@@ -66,7 +67,8 @@ export function PayScreen() {
         return;
       }
       orderPlaced(result.order);
-      router.push("/done");
+      // The order number rides in the URL so a reload can fetch it back from the server.
+      router.push(`/done?o=${encodeURIComponent(result.order.orderNo.replace(/^#/, ""))}`);
     } catch {
       patch({ submitting: false, cardMsg: "Couldn't reach the kitchen. Check your connection." });
     }

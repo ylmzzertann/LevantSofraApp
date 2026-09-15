@@ -140,6 +140,71 @@ CREATE TABLE IF NOT EXISTS favourites (
   created_at timestamptz NOT NULL DEFAULT now(),
   PRIMARY KEY (guest_id, dish_id)
 );
+
+-- Voids. A round or a single plate taken off a bill keeps its row, so the pass
+-- can see what to stop cooking and the owner can see who took it off and why.
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS voided_at timestamptz;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS voided_by text;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS void_reason text;
+ALTER TABLE order_lines ADD COLUMN IF NOT EXISTS voided_qty integer NOT NULL DEFAULT 0;
+
+-- One account per person. The shared password had no way to answer who took
+-- money off a bill at 9pm.
+CREATE TABLE IF NOT EXISTS staff (
+  id            text PRIMARY KEY,
+  email         text NOT NULL UNIQUE,
+  name          text NOT NULL,
+  role          text NOT NULL DEFAULT 'staff',
+  password_hash text NOT NULL,
+  active        boolean NOT NULL DEFAULT true,
+  created_at    timestamptz NOT NULL DEFAULT now()
+);
+
+-- Server-side sessions, so signing out or switching an account off takes effect
+-- immediately instead of whenever a signed cookie happens to expire. Only a hash
+-- of the token is stored.
+CREATE TABLE IF NOT EXISTS staff_sessions (
+  token_hash text PRIMARY KEY,
+  staff_id   text NOT NULL REFERENCES staff(id) ON DELETE CASCADE,
+  expires_at timestamptz NOT NULL,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS staff_sessions_staff_idx ON staff_sessions (staff_id);
+
+CREATE TABLE IF NOT EXISTS audit_log (
+  id         text PRIMARY KEY,
+  staff_id   text,
+  staff_name text,
+  action     text NOT NULL,
+  subject    text,
+  detail     jsonb NOT NULL DEFAULT '{}'::jsonb,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS audit_log_created_idx ON audit_log (created_at DESC);
+
+-- Money taken against a table's tab — cash, card at the terminal, part now and
+-- part later. What a tab still owes is what it ran up minus these.
+CREATE TABLE IF NOT EXISTS payments (
+  id         text PRIMARY KEY,
+  session_id text NOT NULL,
+  amount     integer NOT NULL,
+  method     text NOT NULL,
+  staff_id   text,
+  note       text NOT NULL DEFAULT '',
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS payments_session_idx ON payments (session_id);
+
+-- Rate limits live in the database rather than in process memory, so they hold
+-- across restarts and across every instance that shares the database.
+CREATE TABLE IF NOT EXISTS rate_limits (
+  key      text PRIMARY KEY,
+  count    integer NOT NULL,
+  reset_at timestamptz NOT NULL
+);
 `;
 
 /** Split into individual statements. No literal in the DDL contains a `;`. */

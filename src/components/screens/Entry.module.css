@@ -38,6 +38,16 @@
   position: relative;
 }
 
+/* A code that didn't verify: terracotta instead of olive, and no way in. */
+.tableCard[data-invalid="true"] {
+  border-color: rgba(192, 75, 45, 0.5);
+  background: rgba(192, 75, 45, 0.07);
+}
+
+.tableCard[data-invalid="true"] .stamp {
+  background: var(--terracotta);
+}
+
 .stamp {
   position: absolute;
   top: -11px;

@@ -1,14 +1,27 @@
 "use client";
 
-import { useActionState } from "react";
-import { signIn } from "@/server/admin-actions";
+import { signInAction } from "@/server/admin-actions";
+import { useFormAction } from "../useFormAction";
 import s from "../admin.module.css";
 
 export function LoginForm() {
-  const [error, action, pending] = useActionState(signIn, null);
+  const { error, pending, onSubmit } = useFormAction(signInAction);
 
   return (
-    <form action={action} className={s.form}>
+    <form onSubmit={onSubmit} className={s.form}>
+      <div className={`${s.field} ${s.fieldWide}`}>
+        <label className="ls-label" htmlFor="email">
+          Email
+        </label>
+        <input
+          id="email"
+          name="email"
+          type="email"
+          className={s.input}
+          autoComplete="username"
+          required
+        />
+      </div>
       <div className={`${s.field} ${s.fieldWide}`}>
         <label className="ls-label" htmlFor="password">
           Password

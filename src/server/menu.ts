@@ -27,16 +27,35 @@ async function loadMenu(): Promise<Category[]> {
       .from(schema.categories)
       .where(eq(schema.categories.active, true))
       .orderBy(asc(schema.categories.sortOrder)),
-    db
-      .select()
-      .from(schema.dishes)
-      .orderBy(asc(schema.dishes.sortOrder), asc(schema.dishes.name)),
+    db.select().from(schema.dishes).orderBy(asc(schema.dishes.sortOrder), asc(schema.dishes.name)),
   ]);
 
   return cats.map((c) => ({
     key: c.key,
     label: c.label,
     sub: c.sub,
+    items: rows.filter((d) => d.categoryKey === c.key).map((d) => toDish(d, c.label)),
+  }));
+}
+
+export interface AdminCategory extends Category {
+  active: boolean;
+  sortOrder: number;
+}
+
+/** Every category, hidden ones included, uncached — the editor must see its own writes. */
+export async function getAdminMenu(): Promise<AdminCategory[]> {
+  await ensureDb();
+  const [cats, rows] = await Promise.all([
+    db.select().from(schema.categories).orderBy(asc(schema.categories.sortOrder)),
+    db.select().from(schema.dishes).orderBy(asc(schema.dishes.sortOrder), asc(schema.dishes.name)),
+  ]);
+  return cats.map((c) => ({
+    key: c.key,
+    label: c.label,
+    sub: c.sub,
+    active: c.active,
+    sortOrder: c.sortOrder,
     items: rows.filter((d) => d.categoryKey === c.key).map((d) => toDish(d, c.label)),
   }));
 }
@@ -57,15 +76,14 @@ function toDish(d: typeof schema.dishes.$inferSelect, catLabel: string): Dish {
   };
 }
 
-/** Server-side pricing. Never trust a price that arrived from the browser. */
-export async function serverPrices(): Promise<Record<string, number>> {
-  await ensureDb();
-  const rows = await db
-    .select({ id: schema.dishes.id, price: schema.dishes.price, name: schema.dishes.name, available: schema.dishes.available })
-    .from(schema.dishes);
-  return Object.fromEntries(rows.map((r) => [r.id, r.price]));
-}
-
+/**
+ * What the server will actually sell, priced from its own records.
+ *
+ * A dish counts as available only if it's switched on *and* its category is
+ * showing. Before categories could be hidden this didn't matter; afterwards,
+ * a hidden section's dishes would still have been orderable by anyone posting
+ * their ids, or sitting in a bag from before the section was hidden.
+ */
 export async function dishLookup(): Promise<
   Record<string, { name: string; price: number; available: boolean }>
 > {
@@ -76,7 +94,11 @@ export async function dishLookup(): Promise<
       name: schema.dishes.name,
       price: schema.dishes.price,
       available: schema.dishes.available,
+      categoryActive: schema.categories.active,
     })
-    .from(schema.dishes);
-  return Object.fromEntries(rows.map((r) => [r.id, { name: r.name, price: r.price, available: r.available }]));
+    .from(schema.dishes)
+    .innerJoin(schema.categories, eq(schema.categories.key, schema.dishes.categoryKey));
+  return Object.fromEntries(
+    rows.map((r) => [r.id, { name: r.name, price: r.price, available: r.available && r.categoryActive }]),
+  );
 }

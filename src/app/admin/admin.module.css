@@ -626,3 +626,306 @@
   padding: 40px 0;
   text-align: center;
 }
+
+/* --- Signed-in bar -------------------------------------------------------- */
+
+.barWho {
+  font: 400 11.5px var(--font-ui), sans-serif;
+  color: rgba(255, 246, 229, 0.6);
+}
+
+.barWho strong {
+  color: var(--cream);
+  font-weight: 500;
+}
+
+.barRole {
+  font: 600 9px var(--font-ui), sans-serif;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  margin-left: 6px;
+  border-radius: var(--r-tag);
+  background: rgba(225, 164, 60, 0.25);
+  color: var(--mustard);
+}
+
+.notice {
+  border: 1px solid rgba(107, 138, 74, 0.45);
+  background: rgba(107, 138, 74, 0.1);
+  color: var(--olive);
+  border-radius: var(--r-card);
+  padding: 12px 14px;
+  font: 400 12px/1.5 var(--font-ui), sans-serif;
+  margin-bottom: 22px;
+}
+
+.devCreds {
+  text-align: left;
+  font: 400 12px/1.6 var(--font-ui), sans-serif;
+  color: var(--ink-70);
+  background: rgba(59, 59, 59, 0.05);
+  border-radius: 5px;
+  padding: 10px 12px;
+  margin-bottom: 18px;
+}
+
+.devCreds code {
+  font-size: 12px;
+  color: var(--ink);
+}
+
+/* --- Voids, refunds, payments -------------------------------------------- */
+
+.round[data-voided="true"] .roundLine,
+.round[data-voided="true"] .roundNo,
+.round[data-voided="true"] .roundTotal {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+.roundBadge[data-state="voided"] {
+  background: rgba(59, 59, 59, 0.12);
+  color: var(--ink);
+}
+
+.roundBadge[data-payment="refund_due"] {
+  background: rgba(192, 75, 45, 0.18);
+  color: var(--terracotta);
+}
+
+.roundBadge[data-payment="refunded"] {
+  background: rgba(59, 59, 59, 0.08);
+  color: var(--ink-62);
+}
+
+.voidNote {
+  font: italic 400 11.5px var(--font-ui), sans-serif;
+  color: var(--ink-55);
+  margin-top: 4px;
+}
+
+.lineRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.linkBtn {
+  font: 500 11px var(--font-ui), sans-serif;
+  color: var(--terracotta);
+  background: none;
+  border: none;
+  padding: 6px 4px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.linkBtn:disabled {
+  color: var(--ink-42);
+  cursor: default;
+}
+
+.struck {
+  text-decoration: line-through;
+  opacity: 0.55;
+}
+
+.payPanel {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px dashed var(--rule-dashed);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.payPanel .input,
+.payPanel .select {
+  margin-top: 6px;
+}
+
+.payField {
+  display: flex;
+  flex-direction: column;
+  min-width: 120px;
+}
+
+.paymentsList {
+  font: 400 12px/1.7 var(--font-ui), sans-serif;
+  color: var(--ink-62);
+  margin-top: 10px;
+}
+
+.ticket[data-voided="true"] {
+  border: 2px solid var(--terracotta);
+  background: repeating-linear-gradient(
+    -45deg,
+    rgba(192, 75, 45, 0.05),
+    rgba(192, 75, 45, 0.05) 10px,
+    transparent 10px,
+    transparent 20px
+  );
+}
+
+.voidBanner {
+  font: 700 12px var(--font-ui), sans-serif;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--cream);
+  background: var(--terracotta);
+  padding: 6px 10px;
+  border-radius: 4px;
+  text-align: center;
+}
+
+/* --- Menu editor: sections ----------------------------------------------- */
+
+.sectionHead {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.sectionHead .sectionTitle {
+  margin: 0;
+}
+
+.sectionHidden {
+  font: 600 9px var(--font-ui), sans-serif;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 3px 7px;
+  border-radius: var(--r-tag);
+  background: rgba(59, 59, 59, 0.1);
+  color: var(--ink-62);
+}
+
+.card[data-hidden="true"] {
+  opacity: 0.7;
+  border-style: dashed;
+}
+
+.moveBtns {
+  display: inline-flex;
+  gap: 4px;
+}
+
+.iconBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--rule-strong);
+  background: transparent;
+  cursor: pointer;
+  font: 500 13px var(--font-ui), sans-serif;
+  color: var(--ink);
+}
+
+.iconBtn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* --- Staff & activity ---------------------------------------------------- */
+
+.staffRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--rule-row);
+}
+
+.staffRow[data-active="false"] .dishName,
+.staffRow[data-active="false"] .dishMeta {
+  opacity: 0.45;
+}
+
+.activity {
+  display: flex;
+  flex-direction: column;
+}
+
+.activityRow {
+  display: grid;
+  grid-template-columns: 130px 1fr;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--rule-row);
+  font: 400 12.5px/1.5 var(--font-ui), sans-serif;
+  color: var(--ink);
+}
+
+.activityWhen {
+  color: var(--ink-50);
+  font-size: 11.5px;
+}
+
+.activityDetail {
+  color: var(--ink-55);
+  font-size: 11.5px;
+}
+
+/* --- QR sheet ------------------------------------------------------------ */
+
+.qrGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 16px;
+}
+
+.qrCard {
+  background: var(--paper);
+  border: 1px solid var(--rule-section);
+  border-radius: var(--r-card);
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  break-inside: avoid;
+}
+
+.qrCard svg {
+  width: 150px;
+  height: 150px;
+}
+
+.qrLabel {
+  font: 500 18px var(--font-display), serif;
+  color: var(--ink);
+}
+
+.qrHint {
+  font: 400 10.5px var(--font-ui), sans-serif;
+  color: var(--ink-50);
+  letter-spacing: 0.04em;
+}
+
+@media print {
+  .noPrint {
+    display: none !important;
+  }
+
+  .qrGrid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .qrCard {
+    border: 1px dashed #999;
+  }
+}
+
+@media (max-width: 600px) {
+  .activityRow {
+    grid-template-columns: 1fr;
+    gap: 2px;
+  }
+}

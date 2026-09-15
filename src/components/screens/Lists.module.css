@@ -148,3 +148,34 @@
 .tail {
   height: 24px;
 }
+
+/* Where an order is, and the code to collect it while it's still waiting. */
+.statusLine {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+  font: 500 12px var(--font-ui), sans-serif;
+  color: var(--olive);
+}
+
+.statusLine[data-status="cancelled"] {
+  color: var(--terracotta);
+}
+
+.statusLine[data-status="completed"] {
+  color: var(--ink-50);
+}
+
+.code {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.1em;
+  color: var(--ink);
+}
+
+.track {
+  margin-left: auto;
+  font: 500 12px var(--font-ui), sans-serif;
+  color: var(--terracotta);
+}

@@ -8,6 +8,7 @@ import type { Mode, Totals } from "./totals";
 export interface OrderLineDto {
   dishId: string;
   name: string;
+  /** What was served — plates voided after the fact are already taken off. */
   qty: number;
   exclusions: string[];
   note: string;
@@ -30,17 +31,49 @@ export interface PlacedOrder {
   customerName?: string;
 }
 
-export type OrderStatus = "placed" | "in_kitchen" | "ready" | "completed" | "cancelled";
+/**
+ * - `awaiting_payment` — recorded, card not yet charged. Invisible to the pass.
+ * - `placed` → `in_kitchen` → `ready` → `completed`
+ * - `cancelled` — voided by staff, or the payment failed.
+ */
+export type OrderStatus =
+  | "awaiting_payment"
+  | "placed"
+  | "in_kitchen"
+  | "ready"
+  | "completed"
+  | "cancelled";
+
+/** An order as its own guest sees it after the fact — for tracking and reloads. */
+export interface GuestOrderView extends PlacedOrder {
+  status: OrderStatus;
+  paymentStatus: string;
+  voided: boolean;
+}
+
+export interface OrderSummaryLine {
+  /** Present only on staff views — it's what a void is addressed to. */
+  lineId?: string;
+  dishId: string;
+  name: string;
+  qty: number;
+  voidedQty: number;
+  exclusions: string[];
+  note: string;
+}
 
 export interface OrderSummary {
   orderNo: string;
   date: string;
   mode: Mode;
   where: string;
-  status: string;
+  status: OrderStatus;
+  paymentStatus: string;
   /** Cents. */
   total: number;
-  lines: Omit<OrderLineDto, "lineTotal">[];
+  lines: OrderSummaryLine[];
+  voided: boolean;
+  voidReason?: string;
   pickupCode?: string;
   pickupLabel?: string;
   customerName?: string;
@@ -55,4 +88,6 @@ export interface PromoResult {
 
 export type PlaceOrderResult =
   | { ok: true; order: PlacedOrder }
-  | { ok: false; error: string; field?: "lines" | "payment" | "promo" | "pickup" };
+  | { ok: false; error: string; field?: "lines" | "payment" | "promo" | "pickup" | "table" };
+
+export type ActionResult = { ok: true } | { ok: false; error: string };

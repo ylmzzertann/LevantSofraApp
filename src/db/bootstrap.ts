@@ -1,7 +1,18 @@
-import { sql } from "drizzle-orm";
+import { count, sql } from "drizzle-orm";
 import { CATEGORIES } from "@/data/menu";
+import { hashPassword } from "@/server/security";
 import { db, isRemoteDb, localDataDir, resetLocalDb, schema } from "./index";
 import { statements } from "./ddl";
+
+/**
+ * Created automatically in development only, so `npm run dev` needs no setup.
+ * Production never gets it — the first owner is made on `/admin/setup`.
+ */
+export const DEV_OWNER = {
+  email: "owner@levant.dev",
+  password: "levant-dev",
+  name: "Development owner",
+} as const;
 
 /**
  * Applies the schema and, on an empty database, seeds it from the menu the
@@ -45,6 +56,22 @@ async function boot(): Promise<void> {
     }
   }
   await seed();
+  await seedDevOwner();
+}
+
+async function seedDevOwner(): Promise<void> {
+  if (process.env.NODE_ENV === "production") return;
+  const [row] = await db.select({ n: count() }).from(schema.staff);
+  if (Number(row?.n ?? 0) > 0) return;
+
+  await db.insert(schema.staff).values({
+    id: crypto.randomUUID(),
+    email: DEV_OWNER.email,
+    name: DEV_OWNER.name,
+    role: "owner",
+    passwordHash: await hashPassword(DEV_OWNER.password),
+    active: true,
+  });
 }
 
 async function applySchema(): Promise<void> {

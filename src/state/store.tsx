@@ -20,6 +20,8 @@ export interface State {
   mode: Mode;
   tableId: string;
   tableLabel: string;
+  /** The signature from the table's QR sticker — the server needs it to accept the order. */
+  tableKey: string;
   bag: BagLine[];
   favs: Record<string, boolean>;
   promo: string;
@@ -49,6 +51,7 @@ const INITIAL: State = {
   mode: "pickup",
   tableId: "",
   tableLabel: "",
+  tableKey: "",
   bag: [],
   favs: {},
   promo: "",
@@ -71,7 +74,7 @@ const INITIAL: State = {
 
 type Action =
   | { type: "hydrate"; value: Partial<State> }
-  | { type: "setMode"; mode: Mode; tableId?: string; tableLabel?: string }
+  | { type: "setMode"; mode: Mode; tableId?: string; tableLabel?: string; tableKey?: string }
   | { type: "add"; id: string; qty: number; excl: string[]; note: string }
   | { type: "bump"; key: string; delta: number }
   | { type: "setBag"; bag: BagLine[] }
@@ -90,6 +93,7 @@ function reducer(s: State, a: Action): State {
         mode: a.mode,
         tableId: a.mode === "table" ? (a.tableId ?? s.tableId) : "",
         tableLabel: a.mode === "table" ? (a.tableLabel ?? s.tableLabel) : "",
+        tableKey: a.mode === "table" ? (a.tableKey ?? s.tableKey) : "",
       };
     case "add":
       return { ...s, bag: addLine(s.bag, a.id, a.qty, a.excl, a.note) };
@@ -144,6 +148,7 @@ function persistable(s: State) {
     mode: s.mode,
     tableId: s.tableId,
     tableLabel: s.tableLabel,
+    tableKey: s.tableKey,
     bag: s.bag,
     favs: s.favs,
     customerName: s.customerName,
@@ -155,7 +160,7 @@ interface Store {
   state: State;
   totals: Totals;
   hydrated: boolean;
-  setMode: (mode: Mode, tableId?: string, tableLabel?: string) => void;
+  setMode: (mode: Mode, tableId?: string, tableLabel?: string, tableKey?: string) => void;
   add: (id: string, qty?: number, excl?: string[], note?: string) => void;
   bump: (key: string, delta: number) => void;
   setBag: (bag: BagLine[]) => void;
@@ -216,8 +221,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   /* Stable identities — components put these in effect dependency lists. */
   const actions = useMemo(
     () => ({
-      setMode: (mode: Mode, tableId?: string, tableLabel?: string) =>
-        dispatch({ type: "setMode", mode, tableId, tableLabel }),
+      setMode: (mode: Mode, tableId?: string, tableLabel?: string, tableKey?: string) =>
+        dispatch({ type: "setMode", mode, tableId, tableLabel, tableKey }),
       add: (id: string, qty = 1, excl: string[] = [], note = "") =>
         dispatch({ type: "add", id, qty, excl, note }),
       bump: (key: string, delta: number) => dispatch({ type: "bump", key, delta }),

@@ -1,53 +1,65 @@
+import { sql } from "drizzle-orm";
+import { db, rowsOf } from "@/db";
+import { ensureDb } from "@/db/bootstrap";
+
 /**
- * A crude fixed-window limiter, in memory.
+ * A fixed-window limiter backed by the database.
  *
- * Placing an order is unauthenticated by design — a guest scans a QR and orders
- * — which also means anyone can hammer it. This keeps a single client from
- * filling the pass with junk tickets.
- *
- * It is per-process: behind several instances each gets its own allowance, and
- * it resets on deploy. Move it to Redis or the edge if the restaurant ever runs
- * more than one instance.
+ * It used to live in process memory, which reset on every deploy and gave each
+ * server instance its own separate allowance. One atomic upsert per check keeps
+ * the count shared by everything that talks to the same database.
  */
-
-interface Window {
-  count: number;
-  resetAt: number;
-}
-
-const windows = new Map<string, Window>();
 
 export interface Limit {
   ok: boolean;
   retryAfterSeconds: number;
 }
 
-export function rateLimit(key: string, max: number, windowMs: number): Limit {
-  const now = Date.now();
-  const existing = windows.get(key);
+export async function rateLimit(key: string, max: number, windowMs: number): Promise<Limit> {
+  await ensureDb();
 
-  if (!existing || existing.resetAt <= now) {
-    windows.set(key, { count: 1, resetAt: now + windowMs });
-    if (windows.size > 5000) sweep(now);
-    return { ok: true, retryAfterSeconds: 0 };
+  /* Opens a window if there is none or it has expired, otherwise counts one
+     more hit against it. A single statement, so two requests arriving together
+     can't both read a stale count. */
+  const result = await db.execute(sql`
+    INSERT INTO rate_limits (key, count, reset_at)
+    VALUES (${key}, 1, now() + make_interval(secs => ${windowMs / 1000}::double precision))
+    ON CONFLICT (key) DO UPDATE SET
+      count = CASE WHEN rate_limits.reset_at <= now() THEN 1 ELSE rate_limits.count + 1 END,
+      reset_at = CASE
+        WHEN rate_limits.reset_at <= now()
+          THEN now() + make_interval(secs => ${windowMs / 1000}::double precision)
+        ELSE rate_limits.reset_at
+      END
+    RETURNING count, extract(epoch from (reset_at - now()))::double precision AS remaining
+  `);
+
+  const [row] = rowsOf<{ count: number | string; remaining: number | string }>(result);
+  const count = Number(row?.count ?? 1);
+  const remaining = Math.max(0, Number(row?.remaining ?? 0));
+
+  // Expired windows are only ever overwritten, so sweep them now and then.
+  if (Math.random() < 0.01) {
+    await db.execute(sql`DELETE FROM rate_limits WHERE reset_at < now() - interval '1 hour'`);
   }
 
-  existing.count += 1;
-  if (existing.count > max) {
-    return { ok: false, retryAfterSeconds: Math.ceil((existing.resetAt - now) / 1000) };
-  }
-  return { ok: true, retryAfterSeconds: 0 };
+  return count > max
+    ? { ok: false, retryAfterSeconds: Math.ceil(remaining) }
+    : { ok: true, retryAfterSeconds: 0 };
 }
 
-function sweep(now: number): void {
-  for (const [key, window] of windows) {
-    if (window.resetAt <= now) windows.delete(key);
-  }
-}
-
-/** Best-effort client address. Behind a proxy this is the forwarded header. */
-export function clientKey(request: Request): string {
-  const forwarded = request.headers.get("x-forwarded-for");
+/**
+ * Best-effort client address.
+ *
+ * Trusts the proxy headers, which is right behind Vercel or any reverse proxy
+ * that sets them — and wrong on a server exposed directly, where a client can
+ * send its own. That is why sign-in is also limited per account, not only per
+ * address.
+ */
+export function clientAddress(headers: Headers): string {
+  const real = headers.get("x-real-ip");
+  if (real) return real.trim();
+  const forwarded = headers.get("x-forwarded-for");
   if (forwarded) return forwarded.split(",")[0].trim();
-  return request.headers.get("x-real-ip") ?? "unknown";
+  return "unknown";
 }

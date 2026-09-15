@@ -113,6 +113,12 @@ export const orders = pgTable("orders", {
   pickupCode: text("pickup_code"),
   pickupAt: timestamp("pickup_at", { withTimezone: true }),
 
+  /* A void keeps the row: the pass needs to see what to stop, and the owner
+     needs to see who took it off the bill and why. */
+  voidedAt: timestamp("voided_at", { withTimezone: true }),
+  voidedBy: text("voided_by"),
+  voidReason: text("void_reason"),
+
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -129,6 +135,58 @@ export const orderLines = pgTable("order_lines", {
   /** The point of the whole feature — these reach the pass. */
   exclusions: jsonb("exclusions").notNull().default([]),
   note: text("note").notNull().default(""),
+  /** Plates taken off after the fact. What was served is `qty - voidedQty`. */
+  voidedQty: integer("voided_qty").notNull().default(0),
+});
+
+export const staff = pgTable("staff", {
+  id: text("id").primaryKey(),
+  email: text("email").notNull().unique(),
+  name: text("name").notNull(),
+  /** owner | staff */
+  role: text("role").notNull().default("staff"),
+  passwordHash: text("password_hash").notNull(),
+  active: boolean("active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const staffSessions = pgTable("staff_sessions", {
+  /** sha256 of the cookie token — the token itself is never stored. */
+  tokenHash: text("token_hash").primaryKey(),
+  staffId: text("staff_id")
+    .notNull()
+    .references(() => staff.id, { onDelete: "cascade" }),
+  expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const auditLog = pgTable("audit_log", {
+  id: text("id").primaryKey(),
+  staffId: text("staff_id"),
+  /** Denormalised so the log still reads after an account is renamed. */
+  staffName: text("staff_name"),
+  action: text("action").notNull(),
+  subject: text("subject"),
+  detail: jsonb("detail").notNull().default({}),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const payments = pgTable("payments", {
+  id: text("id").primaryKey(),
+  sessionId: text("session_id").notNull(),
+  /** Cents. */
+  amount: integer("amount").notNull(),
+  /** cash | card | other */
+  method: text("method").notNull(),
+  staffId: text("staff_id"),
+  note: text("note").notNull().default(""),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const rateLimits = pgTable("rate_limits", {
+  key: text("key").primaryKey(),
+  count: integer("count").notNull(),
+  resetAt: timestamp("reset_at", { withTimezone: true }).notNull(),
 });
 
 export const favourites = pgTable(
